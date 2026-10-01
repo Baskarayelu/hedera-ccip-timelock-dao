@@ -12,7 +12,7 @@
     "build": "npm run foundry:compile && npm run next:build",
     "lint": "npm run next:lint && npm run foundry:lint && npm run lint:docs",
     "lint:docs": "node scripts/check-docs.mjs",
-    "test": "npm run foundry:test",
+    "test": "npm run foundry:test && npm run next:test:unit",
     "format": "npm run next:format && npm run foundry:format",
     "foundry:account:generate": "npm run account:generate -w @sh/foundry --",
     "foundry:clean": "npm run clean -w @sh/foundry --",
@@ -31,7 +31,9 @@
     "foundry:deploy:hedera": "npm run deploy:hedera -w @sh/foundry --",
     "foundry:deploy:remote": "npm run deploy:remote -w @sh/foundry --",
     "foundry:export": "npm run export -w @sh/foundry --",
-    "foundry:verify:base-sepolia": "npm run verify:base-sepolia -w @sh/foundry --"
+    "foundry:verify:base-sepolia": "npm run verify:base-sepolia -w @sh/foundry --",
+    "next:test:unit": "npm run test:unit -w @sh/nextjs --",
+    "next:test:e2e": "npm run test:e2e -w @sh/nextjs --"
   },
   "overrides": {
     "@coinbase/cdp-sdk": "1.44.1"

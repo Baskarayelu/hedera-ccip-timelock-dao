@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 import path from "path";
 
 const nextConfig: NextConfig = {
+  // The e2e tests build with fixtures into their own directory, so a fixture build is never served by `next start`.
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   outputFileTracingRoot: path.join(__dirname, "../.."),
   reactStrictMode: true,
   devIndicators: false,

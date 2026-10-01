@@ -78,7 +78,7 @@ jobs:
         run: |
           npm run next:serve -- -p 3100 > serve.log 2>&1 &
           for i in $(seq 1 60); do curl -sf -o /dev/null http://localhost:3100/ && break; sleep 1; done
-          for route in / /debug; do
+          for route in / /proposals/new /voting-power /proposals/1 /debug /api/health; do
             code=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:3100$route")
             echo "$route -> $code"
             test "$code" = "200"

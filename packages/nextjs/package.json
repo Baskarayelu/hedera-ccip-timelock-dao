@@ -9,7 +9,9 @@
     "format": "prettier --write . '!(node_modules|.next|contracts)/**/*'",
     "lint": "next lint",
     "serve": "next start",
-    "start": "next dev"
+    "start": "next dev",
+    "test:unit": "playwright test --project=unit",
+    "test:e2e": "playwright test --project=e2e"
   },
   "dependencies": {
     "@heroicons/react": "2.2.0",
@@ -36,6 +38,7 @@
     "zustand": "5.0.11"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@tailwindcss/postcss": "4.2.1",
     "@trivago/prettier-plugin-sort-imports": "4.3.0",
     "@types/node": "18.19.130",

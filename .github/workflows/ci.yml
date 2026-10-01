@@ -36,8 +36,40 @@ jobs:
       - name: Type-check frontend
         run: npm run next:check-types
 
-      - name: Contract tests
+      - name: Contract and data-layer tests
         run: npm run test
 
       - name: Build
         run: npm run build
+
+  e2e:
+    # Every page and state in fixture mode, at 1440 and 390 px in light and dark, from a production build.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      - name: Install Chromium for Playwright
+        working-directory: packages/nextjs
+        run: npx playwright install --with-deps chromium
+
+      - name: End-to-end tests
+        run: npm run next:test:e2e
+
+      - name: Keep the screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-screenshots
+          path: |
+            packages/nextjs/e2e/screenshots
+            packages/nextjs/playwright-report
+          if-no-files-found: ignore

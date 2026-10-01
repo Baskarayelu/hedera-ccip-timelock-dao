@@ -14,6 +14,7 @@ export const NETWORKS = {
     explorerTx: (hash) => `https://hashscan.io/testnet/transaction/${hash}`,
     explorerAddress: (address) => `https://hashscan.io/testnet/contract/${address}`,
     nativeSymbol: "HBAR",
+    mirrorNode: "https://testnet.mirrornode.hedera.com",
   },
   base_sepolia: {
     chain: baseSepolia,
@@ -23,6 +24,8 @@ export const NETWORKS = {
     explorerTx: (hash) => `https://sepolia.basescan.org/tx/${hash}`,
     explorerAddress: (address) => `https://sepolia.basescan.org/address/${address}`,
     nativeSymbol: "ETH",
+    // Circle's testnet USDC (developers.circle.com/stablecoins/usdc-contract-addresses)
+    usdc: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
   },
 };
 
