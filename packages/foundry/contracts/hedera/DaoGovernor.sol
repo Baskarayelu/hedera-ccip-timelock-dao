@@ -18,10 +18,12 @@ import { HssScheduler } from "./HssScheduler.sol";
 
 /// @notice OpenZeppelin Governor whose proposals queue and execute themselves, with no keeper.
 /// @dev Two network callbacks through the Hedera Schedule Service (HIP-1215):
-/// 1. Creating a proposal schedules `autoQueue` one second after voting ends. If the proposal passed,
-///    that call queues it in the timelock.
-/// 2. Queueing (by the network or by anyone) schedules `autoExecute` at the timelock's ETA, which calls
-///    this contract's own `execute`, so `onlyGovernance` targets work exactly as with a manual execute.
+/// 1. Creating a proposal schedules `autoQueue` just after voting ends. If the proposal passed, that
+///    call queues it in the timelock.
+/// 2. Queueing (by the network or by anyone) schedules `autoExecute` just after the timelock's ETA,
+///    which calls this contract's own `execute`, so `onlyGovernance` targets work exactly as with a
+///    manual execute.
+/// "Just after" is {BLOCK_CLOCK_MARGIN} seconds, because Hedera's `block.timestamp` trails consensus time.
 /// Each step makes one `scheduleCall`, the network's per-transaction limit. Both callbacks are paid
 /// from this contract's HBAR float. `queue` and `execute` stay permissionless as the fallback, and
 /// `rearm` schedules a callback again if it could not be scheduled or failed when it fired.
@@ -88,7 +90,7 @@ contract DaoGovernor is
     // Network callbacks
     // ---------------------------------------------------------------------------------------------
 
-    /// @notice Called by the network one second after voting ends: queues the proposal if it passed.
+    /// @notice Called by the network just after voting ends: queues the proposal if it passed.
     function autoQueue(
         address[] calldata targets,
         uint256[] calldata values,
@@ -104,7 +106,7 @@ contract DaoGovernor is
         }
     }
 
-    /// @notice Called by the network at the timelock ETA: executes the queued proposal.
+    /// @notice Called by the network just after the timelock ETA: executes the queued proposal.
     function autoExecute(
         address[] calldata targets,
         uint256[] calldata values,
@@ -168,7 +170,7 @@ contract DaoGovernor is
         _arm(
             proposalId,
             Action.Queue,
-            proposalDeadline(proposalId) + 1,
+            proposalDeadline(proposalId) + 1 + BLOCK_CLOCK_MARGIN,
             targets,
             values,
             calldatas,
@@ -184,7 +186,7 @@ contract DaoGovernor is
         bytes32 descriptionHash
     ) internal override(Governor, GovernorTimelockControl) returns (uint48 eta) {
         eta = super._queueOperations(proposalId, targets, values, calldatas, descriptionHash);
-        _arm(proposalId, Action.Execute, eta, targets, values, calldatas, descriptionHash);
+        _arm(proposalId, Action.Execute, eta + BLOCK_CLOCK_MARGIN, targets, values, calldatas, descriptionHash);
     }
 
     function _cancel(
@@ -209,7 +211,8 @@ contract DaoGovernor is
         uint256 armedAt = autoSchedules[proposalId][action].at;
         if (armedAt >= block.timestamp) revert AlreadyArmed(proposalId, action, armedAt);
 
-        notBefore = action == Action.Queue ? proposalDeadline(proposalId) + 1 : proposalEta(proposalId);
+        notBefore =
+            (action == Action.Queue ? proposalDeadline(proposalId) + 1 : proposalEta(proposalId)) + BLOCK_CLOCK_MARGIN;
         if (notBefore <= block.timestamp) notBefore = block.timestamp + 1;
     }
 

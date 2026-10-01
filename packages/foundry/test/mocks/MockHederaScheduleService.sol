@@ -6,7 +6,8 @@ import { Vm } from "forge-std/Vm.sol";
 /// @notice Test double for the Hedera Schedule Service at 0x16b, modelling the behaviour measured on
 /// testnet (HAPI 0.77): 15M scheduled gas per second, one `scheduleCall` per transaction (373), busy
 /// seconds (370), the 62-day window (306/307), contract payers, and a payer that cannot cover
-/// `gasLimit * gasPrice` when the call fires (the schedule is consumed, nothing retries).
+/// `gasLimit * gasPrice` when the call fires (the schedule is consumed, nothing retries), and a call
+/// that reads `block.timestamp` up to 3 s earlier than its due second.
 /// @dev Etched at 0x16b, so it keeps no constructor state. Tests mark transaction boundaries with
 /// `newTransaction()`; `executeDue()` plays the network firing every due schedule.
 contract MockHederaScheduleService {
@@ -23,6 +24,9 @@ contract MockHederaScheduleService {
     uint256 public constant MAX_GAS_PER_SECOND = 15_000_000;
     uint256 public constant MAX_EXPIRY_SECONDS = 5_356_800; // 62 days
     uint256 public constant GAS_PRICE = 82; // tinybar per gas on testnet
+    /// @dev Worst-case gap between a schedule's consensus second and the `block.timestamp` its call reads
+    /// (Hedera's block clock is the start of the ~2 s record-file block).
+    uint256 public constant BLOCK_CLOCK_LAG = 3;
     uint160 internal constant SCHEDULE_ADDRESS_OFFSET = 0x5c4ed;
 
     enum Status {
@@ -152,10 +156,13 @@ contract MockHederaScheduleService {
             return;
         }
 
+        uint256 sweepTime = block.timestamp;
+        VM.warp(s.at - BLOCK_CLOCK_LAG);
         uint256 gasBefore = gasleft();
         VM.prank(s.payer);
         (bool ok,) = s.to.call{ gas: s.gasLimit }(s.data);
         uint256 used = gasBefore - gasleft();
+        VM.warp(sweepTime);
         s.status = ok ? Status.Executed : Status.Reverted;
         VM.deal(s.payer, s.payer.balance - used * GAS_PRICE);
     }

@@ -17,6 +17,14 @@ abstract contract HssScheduler {
     /// @dev Local sentinel: the system contract did not answer (not on a Hedera network).
     int64 internal constant HSS_UNAVAILABLE = -2;
 
+    /// @notice Seconds added to a callback's target time.
+    /// @dev On Hedera, `block.timestamp` is the start of the ~2 s record-file block, not the consensus
+    /// time of the transaction: a call the network fires at consensus second S can read
+    /// `block.timestamp` as low as S - 3 (measured on testnet: a schedule due at 1790882223 ran in a block
+    /// that started at 1790882221.78). A callback that needs `block.timestamp >= T` is therefore
+    /// scheduled at `T + BLOCK_CLOCK_MARGIN`.
+    uint256 public constant BLOCK_CLOCK_MARGIN = 4;
+
     /// @notice Schedules `callData` as a call from this contract to itself.
     /// @dev Probes up to `searchWindow` consecutive seconds starting at `notBefore` and schedules in the
     /// first one with capacity. Only the in-transaction capacity probe is authoritative, so the probe

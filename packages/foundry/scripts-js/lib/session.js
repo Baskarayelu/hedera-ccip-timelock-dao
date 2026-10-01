@@ -43,6 +43,16 @@ export function openSession(networkName) {
     transport,
   });
 
+  /**
+   * Hedera's relay reserves `gas * price` from the sender before running a transaction, and an EIP-1559
+   * max fee roughly doubles that reservation, so Hedera transactions go out as legacy transactions at
+   * the network's quoted gas price.
+   */
+  async function feeFields() {
+    if (network.chain.id !== 296) return {};
+    return { type: "legacy", gasPrice: await publicClient.getGasPrice() };
+  }
+
   async function waitFor(hash, label) {
     const receipt = await publicClient.waitForTransactionReceipt({
       hash,
@@ -72,6 +82,7 @@ export function openSession(networkName) {
         args,
         gas,
         value,
+        ...(await feeFields()),
       });
       const receipt = await waitFor(hash, `deploy ${contractName}`);
       const address = receipt.contractAddress ?? getContractAddress({ from: account.address, nonce: BigInt(nonce) });
@@ -86,6 +97,7 @@ export function openSession(networkName) {
         args,
         gas,
         value,
+        ...(await feeFields()),
       });
       return { hash, receipt: await waitFor(hash, label ?? functionName) };
     },
@@ -100,7 +112,7 @@ export function openSession(networkName) {
     },
 
     async send(to, value, { gas, label } = {}) {
-      const hash = await walletClient.sendTransaction({ to, value, gas });
+      const hash = await walletClient.sendTransaction({ to, value, gas, ...(await feeFields()) });
       return { hash, receipt: await waitFor(hash, label ?? `send to ${to}`) };
     },
   };

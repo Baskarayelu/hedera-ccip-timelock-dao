@@ -145,12 +145,22 @@ abstract contract DaoFixture is Test {
         voteFor(id, voters);
     }
 
-    /// @dev Lets the network do the rest: auto-queue at deadline + 1, auto-execute at the ETA.
+    /// @dev Second the network's auto-queue call is due.
+    function queueAt(uint256 id) internal view returns (uint256) {
+        return governor.proposalDeadline(id) + 1 + governor.BLOCK_CLOCK_MARGIN();
+    }
+
+    /// @dev Second the network's auto-execute call is due.
+    function executeAt(uint256 id) internal view returns (uint256) {
+        return governor.proposalEta(id) + governor.BLOCK_CLOCK_MARGIN();
+    }
+
+    /// @dev Lets the network do the rest: auto-queue after voting, auto-execute after the timelock.
     function runToExecution(uint256 id) internal {
-        vm.warp(governor.proposalDeadline(id) + 1);
+        vm.warp(queueAt(id));
         hss.executeDue();
         assertEq(uint8(governor.state(id)), uint8(IGovernor.ProposalState.Queued), "not auto-queued");
-        vm.warp(governor.proposalEta(id));
+        vm.warp(executeAt(id));
         hss.executeDue();
     }
 

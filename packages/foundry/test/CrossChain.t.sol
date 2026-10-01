@@ -96,11 +96,11 @@ contract CrossChainTest is DaoFixture {
         Proposal memory p = crossChainProposal(remoteCalls(), "Capped fee");
         uint256 id = propose(p);
         everyoneVotesFor(id);
-        vm.warp(governor.proposalDeadline(id) + 1);
+        vm.warp(queueAt(id));
         hss.executeDue();
 
         hederaRouter.setFee(3 * HBAR);
-        vm.warp(governor.proposalEta(id));
+        vm.warp(executeAt(id));
         vm.recordLogs();
         hss.executeDue();
         assertEq(uint8(governor.state(id)), uint8(IGovernor.ProposalState.Queued), "fee spike: not executed");
@@ -331,9 +331,9 @@ contract CrossChainTest is DaoFixture {
         );
         uint256 id = propose(p);
         everyoneVotesFor(id);
-        vm.warp(governor.proposalDeadline(id) + 1);
+        vm.warp(queueAt(id));
         hss.executeDue();
-        vm.warp(governor.proposalEta(id));
+        vm.warp(executeAt(id));
         vm.recordLogs();
         hss.executeDue();
         Vm.Log[] memory logs = vm.getRecordedLogs();

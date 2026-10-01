@@ -29,7 +29,7 @@ contract DaoGovernorTest is DaoFixture {
 
     function test_proposeArmsAutoQueueOneSecondAfterVotingEnds() public {
         uint256 id = propose(payment());
-        assertEq(armedAt(id, DaoGovernor.Action.Queue), governor.proposalDeadline(id) + 1);
+        assertEq(armedAt(id, DaoGovernor.Action.Queue), queueAt(id));
         assertEq(armedSchedule(id, DaoGovernor.Action.Queue), hss.scheduleAddress(0));
         assertEq(hss.scheduleAt(0).payer, address(governor), "the governor's float pays");
         assertEq(hss.scheduleAt(0).gasLimit, AUTO_QUEUE_GAS);
@@ -39,12 +39,12 @@ contract DaoGovernorTest is DaoFixture {
         uint256 id = propose(payment());
         everyoneVotesFor(id);
 
-        vm.warp(governor.proposalDeadline(id) + 1);
+        vm.warp(queueAt(id));
         assertEq(hss.executeDue(), 1);
         assertEq(uint8(governor.state(id)), uint8(IGovernor.ProposalState.Queued));
-        assertEq(armedAt(id, DaoGovernor.Action.Execute), governor.proposalEta(id), "queueing armed execution");
+        assertEq(armedAt(id, DaoGovernor.Action.Execute), executeAt(id), "queueing armed execution");
 
-        vm.warp(governor.proposalEta(id));
+        vm.warp(executeAt(id));
         vm.expectEmit(address(governor));
         emit IGovernor.ProposalExecuted(id);
         assertEq(hss.executeDue(), 1);
@@ -94,7 +94,7 @@ contract DaoGovernorTest is DaoFixture {
         vm.prank(alice);
         governor.castVote(id, 0);
 
-        vm.warp(governor.proposalDeadline(id) + 1);
+        vm.warp(queueAt(id));
         vm.expectEmit(address(governor));
         emit DaoGovernor.AutoActionSkipped(id, DaoGovernor.Action.Queue, IGovernor.ProposalState.Defeated);
         hss.executeDue();
@@ -111,7 +111,7 @@ contract DaoGovernorTest is DaoFixture {
         voters[0] = small;
         voteFor(id, voters);
 
-        vm.warp(governor.proposalDeadline(id) + 1);
+        vm.warp(queueAt(id));
         hss.executeDue();
         assertEq(uint8(governor.state(id)), uint8(IGovernor.ProposalState.Defeated));
     }
@@ -127,23 +127,23 @@ contract DaoGovernorTest is DaoFixture {
         governor.cancel(p.targets, p.values, p.calldatas, descriptionHash(p));
 
         assertEq(uint8(hss.statusOf(schedule)), uint8(MockHederaScheduleService.Status.Deleted));
-        assertEq(hss.gasReservedAt(governor.proposalDeadline(id) + 1), 0, "capacity released");
+        assertEq(hss.gasReservedAt(queueAt(id)), 0, "capacity released");
     }
 
     // ---- network edge cases ----------------------------------------------------------------------
 
     function test_busySecondsMoveTheCallbackToTheNextFreeOne() public {
-        uint256 deadline = block.timestamp + VOTING_DELAY + VOTING_PERIOD;
-        hss.occupy(deadline + 1, 15_000_000);
-        hss.occupy(deadline + 2, 13_000_000); // 2M left, auto-queue needs 3M
+        uint256 firstSlot = block.timestamp + VOTING_DELAY + VOTING_PERIOD + 1 + governor.BLOCK_CLOCK_MARGIN();
+        hss.occupy(firstSlot, 15_000_000);
+        hss.occupy(firstSlot + 1, 13_000_000); // 2M left, auto-queue needs 3M
         uint256 id = propose(payment());
-        assertEq(armedAt(id, DaoGovernor.Action.Queue), deadline + 3);
+        assertEq(armedAt(id, DaoGovernor.Action.Queue), firstSlot + 2);
     }
 
     function test_noCapacityInWindowNeverBlocksTheProposal() public {
-        uint256 deadline = block.timestamp + VOTING_DELAY + VOTING_PERIOD;
+        uint256 firstSlot = block.timestamp + VOTING_DELAY + VOTING_PERIOD + 1 + governor.BLOCK_CLOCK_MARGIN();
         for (uint256 i; i < governor.SLOT_SEARCH_WINDOW(); ++i) {
-            hss.occupy(deadline + 1 + i, 15_000_000);
+            hss.occupy(firstSlot + i, 15_000_000);
         }
         vm.recordLogs();
         uint256 id = propose(payment());
@@ -153,20 +153,20 @@ contract DaoGovernorTest is DaoFixture {
 
     function test_rearmAfterTheBusyWindowRecoversAutoQueue() public {
         Proposal memory p = payment();
-        uint256 deadline = block.timestamp + VOTING_DELAY + VOTING_PERIOD;
+        uint256 firstSlot = block.timestamp + VOTING_DELAY + VOTING_PERIOD + 1 + governor.BLOCK_CLOCK_MARGIN();
         for (uint256 i; i < governor.SLOT_SEARCH_WINDOW(); ++i) {
-            hss.occupy(deadline + 1 + i, 15_000_000);
+            hss.occupy(firstSlot + i, 15_000_000);
         }
         uint256 id = propose(p);
         everyoneVotesFor(id);
 
-        vm.warp(deadline + governor.SLOT_SEARCH_WINDOW() + 1);
+        vm.warp(firstSlot + governor.SLOT_SEARCH_WINDOW());
         nextTx();
         vm.prank(makeAddr("anyone"));
         governor.rearm(p.targets, p.values, p.calldatas, descriptionHash(p), DaoGovernor.Action.Queue);
         assertEq(armedAt(id, DaoGovernor.Action.Queue), block.timestamp + 1);
 
-        vm.warp(block.timestamp + 1);
+        vm.warp(armedAt(id, DaoGovernor.Action.Queue));
         hss.executeDue();
         assertEq(uint8(governor.state(id)), uint8(IGovernor.ProposalState.Queued));
     }
@@ -177,7 +177,7 @@ contract DaoGovernorTest is DaoFixture {
         everyoneVotesFor(id);
         vm.deal(address(governor), 0);
 
-        vm.warp(governor.proposalDeadline(id) + 1);
+        vm.warp(queueAt(id));
         hss.executeDue();
         assertEq(
             uint8(hss.statusOf(hss.scheduleAddress(0))),
@@ -191,7 +191,7 @@ contract DaoGovernorTest is DaoFixture {
         vm.prank(makeAddr("anyone"));
         governor.queue(p.targets, p.values, p.calldatas, descriptionHash(p));
 
-        vm.warp(governor.proposalEta(id));
+        vm.warp(executeAt(id));
         hss.executeDue();
         assertEq(uint8(governor.state(id)), uint8(IGovernor.ProposalState.Executed), "execution stayed keeperless");
     }
@@ -201,9 +201,9 @@ contract DaoGovernorTest is DaoFixture {
         Proposal memory p = single(address(reverter), 0, abi.encodeCall(Reverter.boom, ()), "Doomed");
         uint256 id = propose(p);
         everyoneVotesFor(id);
-        vm.warp(governor.proposalDeadline(id) + 1);
+        vm.warp(queueAt(id));
         hss.executeDue();
-        vm.warp(governor.proposalEta(id));
+        vm.warp(executeAt(id));
 
         vm.recordLogs();
         hss.executeDue();
@@ -251,7 +251,7 @@ contract DaoGovernorTest is DaoFixture {
         voteFor(id2, voters);
 
         vm.deal(address(governor), 0); // let both auto-queues fail so queueing is manual
-        vm.warp(governor.proposalDeadline(id2) + 1);
+        vm.warp(queueAt(id2));
         hss.executeDue();
         vm.deal(address(governor), 20 * HBAR);
 
@@ -264,7 +264,7 @@ contract DaoGovernorTest is DaoFixture {
         vm.warp(block.timestamp + 1);
         nextTx();
         governor.rearm(p2.targets, p2.values, p2.calldatas, descriptionHash(p2), DaoGovernor.Action.Execute);
-        vm.warp(governor.proposalEta(id2));
+        vm.warp(executeAt(id2));
         hss.executeDue();
         assertEq(uint8(governor.state(id1)), uint8(IGovernor.ProposalState.Executed));
         assertEq(uint8(governor.state(id2)), uint8(IGovernor.ProposalState.Executed));
