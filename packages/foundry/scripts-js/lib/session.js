@@ -8,9 +8,9 @@ import { privateKeyToAccount } from "viem/accounts";
 import { getNetwork } from "./networks.js";
 
 const packageRoot = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
-// packages/foundry/.env first, then a repo-root .env.local; both are gitignored and the first wins.
-config({ path: join(packageRoot, ".env"), quiet: true });
-config({ path: join(packageRoot, "..", "..", ".env.local"), quiet: true });
+// A repo-root .env.local wins over packages/foundry/.env (both gitignored); dotenv never overrides.
+config({ path: join(packageRoot, "..", "..", ".env.local") });
+config({ path: join(packageRoot, ".env") });
 
 /** Reads a compiled contract from Foundry's `out/` directory. */
 export function loadArtifact(contractName) {
