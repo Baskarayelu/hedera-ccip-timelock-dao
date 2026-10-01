@@ -1,0 +1,30 @@
+{
+  "network": "base_sepolia",
+  "chainId": 84532,
+  "deployer": "0x3f243741e066f6f9C061DF1B94E215921c321Bd7",
+  "deployedAt": "2026-10-01T19:25:28.296Z",
+  "ccip": {
+    "router": "0xD3b06cEbF099CE7DA4AcCf578aaebFDBd6e88a93",
+    "chainSelector": "10344971235874465080"
+  },
+  "config": {
+    "receiptGasLimit": "300000",
+    "sponsoredReceiptsPerDao": "10",
+    "receiptsTo": "hedera_testnet"
+  },
+  "contracts": {
+    "CrossChainExecutor": {
+      "address": "0x9b7691b0766a55d8509b07cb633ce281fee2a632",
+      "txHash": "0xe01972855e24a6a87a506799305bc6e992ef9d729f6942902f7fcefcc2f7ed98",
+      "blockNumber": "47557219"
+    },
+    "RemoteParameters": {
+      "address": "0x5f8b11a830ce09d87fa586c95e7c85fa57691cd9",
+      "txHash": "0xa531962154e3d6a52cb08965730c60c900963ac2c4153c11a526f2bc25c94f92",
+      "blockNumber": "47557220"
+    }
+  },
+  "transactions": {
+    "sponsorPool": "0x45ae75c5387f183b3d0b388a0ea08e5a6966448f2eea2e437e639efc13782f4d"
+  }
+}

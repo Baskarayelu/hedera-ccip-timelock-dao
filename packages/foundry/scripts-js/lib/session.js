@@ -8,7 +8,9 @@ import { privateKeyToAccount } from "viem/accounts";
 import { getNetwork } from "./networks.js";
 
 const packageRoot = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
-config({ path: join(packageRoot, ".env") });
+// packages/foundry/.env first, then a repo-root .env.local; both are gitignored and the first wins.
+config({ path: join(packageRoot, ".env"), quiet: true });
+config({ path: join(packageRoot, "..", "..", ".env.local"), quiet: true });
 
 /** Reads a compiled contract from Foundry's `out/` directory. */
 export function loadArtifact(contractName) {
@@ -31,7 +33,7 @@ export function openSession(networkName) {
   const key = process.env.DEPLOYER_PRIVATE_KEY;
   if (!key || !/^0x[0-9a-fA-F]{64}$/.test(key)) {
     throw new Error(
-      "DEPLOYER_PRIVATE_KEY is missing or malformed in packages/foundry/.env (run `npm run foundry:account:generate`).",
+      "DEPLOYER_PRIVATE_KEY is missing or malformed in packages/foundry/.env or .env.local (run `npm run foundry:account:generate`).",
     );
   }
   const account = privateKeyToAccount(key);
