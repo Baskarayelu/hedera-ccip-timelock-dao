@@ -13,13 +13,9 @@
     "lint": "npm run next:lint && npm run foundry:lint",
     "test": "npm run foundry:test",
     "format": "npm run next:format && npm run foundry:format",
-    "foundry:account": "npm run account -w @sh/foundry --",
     "foundry:account:generate": "npm run account:generate -w @sh/foundry --",
-    "foundry:account:import": "npm run account:import -w @sh/foundry --",
-    "foundry:chain": "npm run chain -w @sh/foundry --",
     "foundry:clean": "npm run clean -w @sh/foundry --",
     "foundry:compile": "npm run compile -w @sh/foundry --",
-    "foundry:deploy": "npm run deploy -w @sh/foundry --",
     "foundry:format": "npm run format -w @sh/foundry --",
     "foundry:lint": "npm run lint -w @sh/foundry --",
     "foundry:test": "npm run test -w @sh/foundry --",
@@ -30,7 +26,11 @@
     "next:format": "npm run format -w @sh/nextjs --",
     "next:lint": "npm run lint -w @sh/nextjs --",
     "next:serve": "npm run serve -w @sh/nextjs --",
-    "next:start": "npm run start -w @sh/nextjs --"
+    "next:start": "npm run start -w @sh/nextjs --",
+    "foundry:deploy:hedera": "npm run deploy:hedera -w @sh/foundry --",
+    "foundry:deploy:remote": "npm run deploy:remote -w @sh/foundry --",
+    "foundry:export": "npm run export -w @sh/foundry --",
+    "foundry:verify:base-sepolia": "npm run verify:base-sepolia -w @sh/foundry --"
   },
   "overrides": {
     "@coinbase/cdp-sdk": "1.44.1"

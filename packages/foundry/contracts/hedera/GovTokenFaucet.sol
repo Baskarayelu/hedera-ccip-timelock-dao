@@ -34,6 +34,7 @@ contract GovTokenFaucet {
     error ClaimTooSoon(uint256 nextClaimAt);
     error NotAssociated(address account);
     error HtsFailed(int64 responseCode);
+    error RefundFailed();
 
     constructor(int64 claimAmount_, uint256 claimCooldown_) {
         deployer = msg.sender;
@@ -41,7 +42,8 @@ contract GovTokenFaucet {
         claimCooldown = claimCooldown_;
     }
 
-    /// @notice Creates the HTS token. `msg.value` pays the network's token-creation fee (excess is refunded by HTS).
+    /// @notice Creates the HTS token. `msg.value` pays the network's token-creation fee; whatever the
+    /// network does not charge is returned to the deployer.
     function createToken(string calldata name, string calldata symbol) external payable returns (address created) {
         if (msg.sender != deployer) revert NotDeployer();
         if (token != address(0)) revert TokenAlreadyCreated();
@@ -78,6 +80,12 @@ contract GovTokenFaucet {
 
         token = created;
         emit TokenCreated(created, name, symbol);
+
+        uint256 unused = address(this).balance;
+        if (unused != 0) {
+            (bool ok,) = deployer.call{ value: unused }("");
+            if (!ok) revert RefundFailed();
+        }
     }
 
     /// @notice Mints `claimAmount` and sends it to the caller, at most once per `claimCooldown`.

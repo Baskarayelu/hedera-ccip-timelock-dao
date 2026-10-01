@@ -40,6 +40,10 @@ contract GovTokenFaucetTest is Test {
         assertEq(faucet.token(), token);
     }
 
+    function test_unchargedCreationValueReturnsToTheDeployer() public view {
+        assertEq(address(faucet).balance, 0, "nothing stranded in the faucet");
+    }
+
     function test_tokenCanOnlyBeCreatedOnceByTheDeployer() public {
         vm.expectRevert(GovTokenFaucet.TokenAlreadyCreated.selector);
         faucet.createToken{ value: 1e8 }("Again", "AGN");
