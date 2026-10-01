@@ -1,0 +1,78 @@
+name: Template gate
+
+# Reproduces what a judge or new developer does: scaffold this commit with the real CLI, then install,
+# lint, test, build, boot the app and request every route.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  fresh-scaffold:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Git identity for the CLI's initial commit
+        run: |
+          git config --global user.name "template-gate"
+          git config --global user.email "template-gate@users.noreply.github.com"
+
+      - name: Scaffold this commit with create-scaffold-hbar
+        run: |
+          npx --yes create-scaffold-hbar@latest gate-app \
+            --template "${{ github.repository }}#${{ github.sha }}" \
+            --package-manager npm --yes --skip-install --skip-hedera-skills
+          test -f gate-app/package.json
+          test ! -f gate-app/template.json # the CLI consumes the manifest
+          test -f gate-app/packages/foundry/.env.example
+
+      - name: The npm-mode rewrite left the docs readable
+        working-directory: gate-app
+        run: |
+          if grep -rn --include='*.md' -E 'npm run (create|i|ci|install)\b' . ; then
+            echo "::error::create-scaffold-hbar rewrote a command in the docs"
+            exit 1
+          fi
+
+      - name: Install
+        working-directory: gate-app
+        run: npm install --no-audit --no-fund
+
+      - name: Lint
+        working-directory: gate-app
+        run: npm run lint
+
+      - name: Contract tests
+        working-directory: gate-app
+        run: npm test
+
+      - name: Build
+        working-directory: gate-app
+        run: npm run build
+
+      - name: Boot and request every route
+        working-directory: gate-app
+        run: |
+          npm run next:serve -- -p 3100 > serve.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf -o /dev/null http://localhost:3100/ && break; sleep 1; done
+          for route in / /debug; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:3100$route")
+            echo "$route -> $code"
+            test "$code" = "200"
+          done
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
