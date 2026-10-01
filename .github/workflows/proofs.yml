@@ -1,0 +1,22 @@
+name: On-chain proofs
+
+# Re-verifies every HashScan, CCIP explorer and Basescan link in the docs against the mirror node, the CCIP
+# explorer and Base Sepolia, so the evidence the README cites stays true.
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  proofs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify every on-chain link in the Markdown
+        run: node scripts/check-proofs.mjs

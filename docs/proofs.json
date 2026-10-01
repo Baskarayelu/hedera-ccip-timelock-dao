@@ -1,0 +1,15 @@
+{
+  "description": "Expected outcomes for on-chain links in the docs that show a failure on purpose or whose gas the docs quote. scripts/check-proofs.mjs treats every other link as a plain success.",
+  "expect": {
+    "0.0.10813682": "INSUFFICIENT_PAYER_BALANCE",
+    "0x82309dcb1ee3162ea6beacdc749053a890089c0c5bae84a5bb5711877faee026": "failure",
+    "0x927993a3b5b5be9185a3e121d35970ce1473015a7419297bd592d18da3cca91e": {
+      "result": "SUCCESS",
+      "gasUsed": 1436980
+    },
+    "0x8722ad017f736b001199f321a0ca6f4c7419e3c2d4f38619178d5d60c708069e": {
+      "result": "SUCCESS",
+      "gasUsed": 1436980
+    }
+  }
+}
