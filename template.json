@@ -1,41 +1,45 @@
 {
-  "name": "blank",
-  "description": "Minimal Scaffold-HBAR starter: Next.js, Hardhat or Foundry, sample HTS contracts, no opinionated product UI.",
+  "name": "hedera-ccip-timelock-dao",
+  "description": "An HTS-token DAO whose proposals queue and execute themselves through the Hedera Schedule Service and act on Base Sepolia over Chainlink CCIP, with receipts back to Hedera.",
+  "version": "0.1.0",
   "create-scaffold-hbar": {
     "capabilities": {
       "frontend": ["nextjs-app"],
-      "solidityFramework": ["foundry", "hardhat"],
-      "packageManager": ["yarn", "npm"]
+      "solidityFramework": ["foundry"],
+      "packageManager": ["npm"]
     },
     "defaults": {
       "frontend": "nextjs-app",
       "solidityFramework": "foundry",
-      "packageManager": "yarn"
+      "packageManager": "npm"
     },
+    "requirements": {
+      "node": ">=20.18.3",
+      "forge": ">=1.8.4"
+    },
+    "envVars": [
+      {
+        "key": "DEPLOYER_PRIVATE_KEY",
+        "description": "Only to deploy your own DAO: an ECDSA testnet key (put it in .env.local; never commit it)"
+      }
+    ],
     "outro": {
       "sections": [
         {
-          "title": "Next steps",
+          "title": "Try the live testnet DAO",
           "steps": [
-            {
-              "label": "Generate or import a deployer account",
-              "command": "{run:framework:account:generate}"
-            },
-            {
-              "label": "Start a local chain",
-              "command": "{run:framework:chain}"
-            },
-            {
-              "label": "Deploy contracts to that node",
-              "command": "{run:framework:deploy} --network localhost"
-            },
-            {
-              "label": "Start the frontend",
-              "command": "{run:next:dev}"
-            },
-            {
-              "text": "For Hedera testnet/mainnet deploy and verify, see the Scaffold HBAR docs and your chosen package README under packages/hardhat or packages/foundry."
-            }
+            { "label": "Start the app", "command": "{run:next:dev}" },
+            { "text": "Open http://localhost:3000, connect a Hedera testnet wallet, then claim, wrap and delegate on the Voting power page." },
+            { "label": "Testnet HBAR", "url": "https://portal.hedera.com/faucet" }
+          ]
+        },
+        {
+          "title": "Deploy your own DAO",
+          "steps": [
+            { "label": "Create a deployer key", "command": "{run:foundry:account:generate}" },
+            { "label": "Deploy to Hedera testnet", "command": "{run:foundry:deploy:hedera}" },
+            { "label": "Point the app at it", "command": "{run:foundry:export}" },
+            { "text": "README.md walks through every step, the costs in HBAR and what to do when the network's call fails." }
           ]
         }
       ]
