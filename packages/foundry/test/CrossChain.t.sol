@@ -77,7 +77,7 @@ contract CrossChainTest is DaoFixture {
         bytes32 receiptId = baseRouter.lastMessageId();
         vm.expectEmit(address(timelock));
         emit DaoTimelock.CrossChainReceipt(
-            requestId, operationId(p), receiptId, CrossChainMessages.Status.Executed, uint64(block.timestamp), ""
+            requestId, operationId(p), receiptId, CrossChainMessages.Status.Executed, uint64(vm.getBlockTimestamp()), ""
         );
         hederaRouter.deliver(baseRouter, receiptId);
         assertEq(uint8(timelock.receiptOf(requestId).status), uint8(CrossChainMessages.Status.Executed));
@@ -107,10 +107,10 @@ contract CrossChainTest is DaoFixture {
         assertEq(hederaRouter.sentCount(), 0);
 
         hederaRouter.setFee(HEDERA_CCIP_FEE);
-        vm.warp(block.timestamp + 1);
+        vm.warp(vm.getBlockTimestamp() + 1);
         nextTx();
         governor.rearm(p.targets, p.values, p.calldatas, descriptionHash(p), DaoGovernor.Action.Execute);
-        vm.warp(block.timestamp + 1);
+        vm.warp(vm.getBlockTimestamp() + 1);
         hss.executeDue();
         assertEq(uint8(governor.state(id)), uint8(IGovernor.ProposalState.Executed));
         assertEq(hederaRouter.sentCount(), 1);
@@ -118,7 +118,7 @@ contract CrossChainTest is DaoFixture {
 
     function test_requestDelayedPastItsDeadlineIsNotExecuted() public {
         (, bytes32 requestId) = passAndExecute(crossChainProposal(remoteCalls(), "Stale"));
-        vm.warp(block.timestamp + REQUEST_TTL + 1);
+        vm.warp(vm.getBlockTimestamp() + REQUEST_TTL + 1);
         baseRouter.deliver(hederaRouter, requestId);
 
         assertEq(uint8(executor.statusOf(requestId)), uint8(CrossChainMessages.Status.Expired));
@@ -162,7 +162,7 @@ contract CrossChainTest is DaoFixture {
     {
         CrossChainMessages.Request memory r;
         r.version = CrossChainMessages.VERSION;
-        r.validUntil = uint64(block.timestamp + 1 hours);
+        r.validUntil = uint64(vm.getBlockTimestamp() + 1 hours);
         r.calls = calls;
         return Client.Any2EVMMessage({
             messageId: messageId,
@@ -255,7 +255,7 @@ contract CrossChainTest is DaoFixture {
     }
 
     function testFuzz_eachDaoActsOnlyThroughItsOwnAccount(address daoA, address daoB, uint64 chainB) public {
-        vm.assume(daoA != daoB);
+        vm.assume(daoA != daoB && daoB != address(0));
         address accountA = executor.accountOf(HEDERA, daoA);
         address accountB = executor.accountOf(chainB, daoB);
         assertTrue(accountA != accountB);
@@ -292,7 +292,9 @@ contract CrossChainTest is DaoFixture {
             sourceChainSelector: source,
             sender: abi.encode(sender),
             data: abi.encode(
-                CrossChainMessages.Receipt(requestId, CrossChainMessages.Status.Executed, uint64(block.timestamp), "")
+                CrossChainMessages.Receipt(
+                    requestId, CrossChainMessages.Status.Executed, uint64(vm.getBlockTimestamp()), ""
+                )
             ),
             destTokenAmounts: new Client.EVMTokenAmount[](0)
         });

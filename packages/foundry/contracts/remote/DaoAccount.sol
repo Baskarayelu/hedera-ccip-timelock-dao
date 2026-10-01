@@ -17,6 +17,7 @@ contract DaoAccount {
     error AlreadyInitialized();
     error NotExecutor(address caller);
     error CallFailed(uint256 index, bytes reason);
+    error ZeroSourceDao();
 
     modifier onlyExecutor() {
         if (msg.sender != executor) revert NotExecutor(msg.sender);
@@ -26,6 +27,7 @@ contract DaoAccount {
     /// @dev Called once by the executor in the same transaction that clones the account.
     function initialize(uint64 sourceChainSelector_, address sourceDao_) external {
         if (executor != address(0)) revert AlreadyInitialized();
+        if (sourceDao_ == address(0)) revert ZeroSourceDao();
         executor = msg.sender;
         sourceChainSelector = sourceChainSelector_;
         sourceDao = sourceDao_;
@@ -34,7 +36,9 @@ contract DaoAccount {
     /// @notice Runs the batch atomically: one failing call reverts all of them.
     function executeCalls(CrossChainMessages.Call[] calldata calls) external onlyExecutor {
         for (uint256 i; i < calls.length; ++i) {
+            // forge-lint: disable-next-line(calls-loop) the DAO approved this batch; it runs atomically by design
             (bool ok, bytes memory ret) = calls[i].target.call{ value: calls[i].value }(calls[i].data);
+            // forge-lint: disable-next-line(require-revert-in-loop) one failing call must undo the whole batch
             if (!ok) revert CallFailed(i, ret);
         }
         emit CallsExecuted(calls.length);

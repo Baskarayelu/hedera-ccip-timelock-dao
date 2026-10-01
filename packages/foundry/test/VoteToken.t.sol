@@ -25,7 +25,7 @@ contract VoteTokenTest is DaoFixture {
     }
 
     function test_clockIsTimestamp() public view {
-        assertEq(votes.clock(), block.timestamp);
+        assertEq(votes.clock(), vm.getBlockTimestamp());
         assertEq(votes.CLOCK_MODE(), "mode=timestamp");
     }
 

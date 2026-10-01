@@ -7,6 +7,7 @@ import { ERC20Permit } from "@openzeppelin/contracts/token/ERC20/extensions/ERC2
 import { ERC20Votes } from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import { ERC20Wrapper } from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
 import { Nonces } from "@openzeppelin/contracts/utils/Nonces.sol";
+import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { IHRC719 } from "hedera-forking/IHRC719.sol";
 
 /// @notice Wrap-to-vote: a 1:1 ERC20Votes wrapper around the DAO's HTS governance token.
@@ -32,6 +33,7 @@ contract VoteToken is ERC20, ERC20Permit, ERC20Votes, ERC20Wrapper {
     /// through `isAssociated()` rather than from `associate()`'s return value.
     function associateUnderlying() external {
         IHRC719 token = IHRC719(address(underlying()));
+        // forge-lint: disable-next-line(unused-return) success is read back through isAssociated()
         if (!token.isAssociated()) token.associate();
         if (!token.isAssociated()) revert AssociationFailed();
         emit UnderlyingAssociated();
@@ -51,7 +53,7 @@ contract VoteToken is ERC20, ERC20Permit, ERC20Votes, ERC20Wrapper {
 
     /// @dev ERC-6372: votes are checkpointed by timestamp.
     function clock() public view override returns (uint48) {
-        return uint48(block.timestamp);
+        return Time.timestamp();
     }
 
     // solhint-disable-next-line func-name-mixedcase

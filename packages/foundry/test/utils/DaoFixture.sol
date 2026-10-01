@@ -79,7 +79,7 @@ abstract contract DaoFixture is Test {
         giveVotes(alice, 400e6);
         giveVotes(bob, 300e6);
         giveVotes(carol, 300e6);
-        vm.warp(block.timestamp + 1);
+        vm.warp(vm.getBlockTimestamp() + 1);
     }
 
     function etchHss() internal {

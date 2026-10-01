@@ -85,10 +85,10 @@ contract GovTokenFaucetTest is Test {
         assertEq(IERC20(token).balanceOf(voter), CLAIMED);
 
         vm.prank(voter);
-        vm.expectRevert(abi.encodeWithSelector(GovTokenFaucet.ClaimTooSoon.selector, block.timestamp + COOLDOWN));
+        vm.expectRevert(abi.encodeWithSelector(GovTokenFaucet.ClaimTooSoon.selector, vm.getBlockTimestamp() + COOLDOWN));
         faucet.claim();
 
-        vm.warp(block.timestamp + COOLDOWN);
+        vm.warp(vm.getBlockTimestamp() + COOLDOWN);
         vm.prank(voter);
         faucet.claim();
         assertEq(IERC20(token).balanceOf(voter), 2 * CLAIMED);

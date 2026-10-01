@@ -16,6 +16,11 @@ optimizer_runs = 200
 # - mixed-case-*, pascal-case-struct: names that mirror external ABIs (CCIP `EVM2AnyMessage`, Hedera `ECDSA_secp256k1`).
 # - screaming-snake-case-immutable: public immutables are part of the read API (`ccipRouter()`, `claimAmount()`).
 # - unwrapped-modifier-logic, asm-keccak256: code-size/gas micro-optimisations traded for readability.
+# - block-timestamp: governance is time-based by design (voting windows, timelock, expiries), and on
+#   Hedera the timestamp comes from hashgraph consensus rather than a single block producer.
+# - reentrancy-events: every flagged event reports the outcome of a call it must follow, made to a
+#   Hedera system contract, the CCIP router, the DAO's own account clone or `this`. Entry points that
+#   reach arbitrary targets are router-only and, on the remote side, guarded by ReentrancyGuardTransient.
 [lint]
 exclude_lints = [
     "mixed-case-variable",
@@ -24,6 +29,8 @@ exclude_lints = [
     "screaming-snake-case-immutable",
     "unwrapped-modifier-logic",
     "asm-keccak256",
+    "block-timestamp",
+    "reentrancy-events",
 ]
 
 [rpc_endpoints]

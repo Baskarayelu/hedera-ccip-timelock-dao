@@ -42,11 +42,14 @@ abstract contract HssScheduler {
             if (!answered) return (HSS_UNAVAILABLE, address(0), 0);
             if (!hasCapacity) continue;
 
+            // At most one scheduleCall per transaction, after a bounded capacity probe.
+            // forge-lint: disable-start(calls-loop)
             (bool ok, bytes memory ret) = HSS.call(
                 abi.encodeCall(
                     IHederaScheduleService.scheduleCall, (address(this), notBefore + i, gasLimit, 0, callData)
                 )
             );
+            // forge-lint: disable-end(calls-loop)
             if (!ok || ret.length < 64) return (HSS_UNAVAILABLE, address(0), 0);
             (rc, schedule) = abi.decode(ret, (int64, address));
             if (rc != HSS_SUCCESS) return (rc, address(0), 0);
@@ -63,8 +66,11 @@ abstract contract HssScheduler {
     }
 
     function _hasCapacity(uint256 second, uint256 gasLimit) private view returns (bool answered, bool hasCapacity) {
+        // Called in a loop bounded by the caller's search window.
+        // forge-lint: disable-start(calls-loop)
         (bool ok, bytes memory ret) =
             HSS.staticcall(abi.encodeCall(IHederaScheduleService.hasScheduleCapacity, (second, gasLimit)));
+        // forge-lint: disable-end(calls-loop)
         if (!ok || ret.length < 32) return (false, false);
         return (true, abi.decode(ret, (bool)));
     }

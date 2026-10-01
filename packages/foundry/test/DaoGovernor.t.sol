@@ -105,7 +105,7 @@ contract DaoGovernorTest is DaoFixture {
         // 4% of 1,000 vGOV is 40; a 30 vGOV voter alone cannot pass a proposal.
         address small = makeAddr("small");
         giveVotes(small, 30e6);
-        vm.warp(block.timestamp + 1);
+        vm.warp(vm.getBlockTimestamp() + 1);
         uint256 id = propose(payment());
         address[] memory voters = new address[](1);
         voters[0] = small;
@@ -133,7 +133,7 @@ contract DaoGovernorTest is DaoFixture {
     // ---- network edge cases ----------------------------------------------------------------------
 
     function test_busySecondsMoveTheCallbackToTheNextFreeOne() public {
-        uint256 firstSlot = block.timestamp + VOTING_DELAY + VOTING_PERIOD + 1 + governor.BLOCK_CLOCK_MARGIN();
+        uint256 firstSlot = vm.getBlockTimestamp() + VOTING_DELAY + VOTING_PERIOD + 1 + governor.BLOCK_CLOCK_MARGIN();
         hss.occupy(firstSlot, 15_000_000);
         hss.occupy(firstSlot + 1, 13_000_000); // 2M left, auto-queue needs 3M
         uint256 id = propose(payment());
@@ -141,7 +141,7 @@ contract DaoGovernorTest is DaoFixture {
     }
 
     function test_noCapacityInWindowNeverBlocksTheProposal() public {
-        uint256 firstSlot = block.timestamp + VOTING_DELAY + VOTING_PERIOD + 1 + governor.BLOCK_CLOCK_MARGIN();
+        uint256 firstSlot = vm.getBlockTimestamp() + VOTING_DELAY + VOTING_PERIOD + 1 + governor.BLOCK_CLOCK_MARGIN();
         for (uint256 i; i < governor.SLOT_SEARCH_WINDOW(); ++i) {
             hss.occupy(firstSlot + i, 15_000_000);
         }
@@ -153,7 +153,7 @@ contract DaoGovernorTest is DaoFixture {
 
     function test_rearmAfterTheBusyWindowRecoversAutoQueue() public {
         Proposal memory p = payment();
-        uint256 firstSlot = block.timestamp + VOTING_DELAY + VOTING_PERIOD + 1 + governor.BLOCK_CLOCK_MARGIN();
+        uint256 firstSlot = vm.getBlockTimestamp() + VOTING_DELAY + VOTING_PERIOD + 1 + governor.BLOCK_CLOCK_MARGIN();
         for (uint256 i; i < governor.SLOT_SEARCH_WINDOW(); ++i) {
             hss.occupy(firstSlot + i, 15_000_000);
         }
@@ -164,7 +164,7 @@ contract DaoGovernorTest is DaoFixture {
         nextTx();
         vm.prank(makeAddr("anyone"));
         governor.rearm(p.targets, p.values, p.calldatas, descriptionHash(p), DaoGovernor.Action.Queue);
-        assertEq(armedAt(id, DaoGovernor.Action.Queue), block.timestamp + 1);
+        assertEq(armedAt(id, DaoGovernor.Action.Queue), vm.getBlockTimestamp() + 1);
 
         vm.warp(armedAt(id, DaoGovernor.Action.Queue));
         hss.executeDue();
@@ -210,10 +210,10 @@ contract DaoGovernorTest is DaoFixture {
         assertEq(vm.getRecordedLogs()[0].topics[0], DaoGovernor.AutoActionFailed.selector);
         assertEq(uint8(governor.state(id)), uint8(IGovernor.ProposalState.Queued), "still executable");
 
-        vm.warp(block.timestamp + 1);
+        vm.warp(vm.getBlockTimestamp() + 1);
         nextTx();
         governor.rearm(p.targets, p.values, p.calldatas, descriptionHash(p), DaoGovernor.Action.Execute);
-        assertEq(armedAt(id, DaoGovernor.Action.Execute), block.timestamp + 1);
+        assertEq(armedAt(id, DaoGovernor.Action.Execute), vm.getBlockTimestamp() + 1);
     }
 
     function test_rearmIsRefusedWhileArmedOrWhenTheStepNoLongerApplies() public {
@@ -261,7 +261,7 @@ contract DaoGovernorTest is DaoFixture {
         assertGt(armedAt(id1, DaoGovernor.Action.Execute), 0);
         assertEq(armedAt(id2, DaoGovernor.Action.Execute), 0, "373: second one not armed");
 
-        vm.warp(block.timestamp + 1);
+        vm.warp(vm.getBlockTimestamp() + 1);
         nextTx();
         governor.rearm(p2.targets, p2.values, p2.calldatas, descriptionHash(p2), DaoGovernor.Action.Execute);
         vm.warp(executeAt(id2));

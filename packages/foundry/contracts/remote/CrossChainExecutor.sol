@@ -2,6 +2,8 @@
 pragma solidity ^0.8.28;
 
 import { Clones } from "@openzeppelin/contracts/proxy/Clones.sol";
+import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import { ReentrancyGuardTransient } from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
 
 import { Client } from "../ccip/Client.sol";
 import { CcipReceiverBase } from "../ccip/CcipReceiverBase.sol";
@@ -20,7 +22,7 @@ import { DaoAccount } from "./DaoAccount.sol";
 /// - a request past its `validUntil` is not executed (a delayed message cannot act on a stale vote);
 /// - a failing batch is recorded and reported instead of reverting, so the DAO learns why;
 /// - the receipt fee comes from the DAO's account, or a small per-DAO allowance from the sponsor pool.
-contract CrossChainExecutor is CcipReceiverBase {
+contract CrossChainExecutor is CcipReceiverBase, ReentrancyGuardTransient {
     enum FeePayer {
         None,
         Account,
@@ -78,12 +80,13 @@ contract CrossChainExecutor is CcipReceiverBase {
         return CrossChainMessages.decodeRequest(data);
     }
 
-    function _ccipReceive(Client.Any2EVMMessage calldata message) internal override {
+    function _ccipReceive(Client.Any2EVMMessage calldata message) internal override nonReentrant {
         if (statusOf[message.messageId] != CrossChainMessages.Status.None) {
             revert AlreadyProcessed(message.messageId);
         }
         if (message.sender.length != 32) revert InvalidSender(message.sender);
         address sourceDao = abi.decode(message.sender, (address));
+        if (sourceDao == address(0)) revert InvalidSender(message.sender);
 
         DaoAccount account = _accountFor(message.sourceChainSelector, sourceDao);
         (CrossChainMessages.Status status, bytes memory revertData) = _run(account, message.data);
@@ -99,7 +102,7 @@ contract CrossChainExecutor is CcipReceiverBase {
             CrossChainMessages.Receipt({
                 requestId: message.messageId,
                 status: status,
-                executedAt: uint64(block.timestamp),
+                executedAt: SafeCast.toUint64(block.timestamp),
                 revertData: revertData
             })
         );
@@ -135,14 +138,21 @@ contract CrossChainExecutor is CcipReceiverBase {
             extraArgs: Client.extraArgsV2(receiptGasLimit)
         });
 
-        uint256 fee;
-        try ICcipRouter(ccipRouter).getFee(destChain, message) returns (uint256 quoted) {
-            fee = quoted;
+        try ICcipRouter(ccipRouter).getFee(destChain, message) returns (uint256 fee) {
+            _payAndSend(destChain, account, message, receipt.requestId, fee);
         } catch (bytes memory reason) {
             emit ReceiptNotSent(receipt.requestId, 0, reason);
-            return;
         }
+    }
 
+    /// @dev Pays the receipt fee from the DAO's account, else from the sponsor pool, and sends it.
+    function _payAndSend(
+        uint64 destChain,
+        DaoAccount account,
+        Client.EVM2AnyMessage memory message,
+        bytes32 requestId,
+        uint256 fee
+    ) internal {
         FeePayer paidBy;
         if (address(account).balance >= fee) {
             account.payExecutor(fee);
@@ -151,21 +161,22 @@ contract CrossChainExecutor is CcipReceiverBase {
             ++sponsoredReceiptsUsed[address(account)];
             paidBy = FeePayer.Sponsor;
         } else {
-            emit ReceiptNotSent(receipt.requestId, fee, abi.encodeWithSelector(ReceiptUnfunded.selector));
+            emit ReceiptNotSent(requestId, fee, abi.encodeWithSelector(ReceiptUnfunded.selector));
             return;
         }
 
         try ICcipRouter(ccipRouter).ccipSend{ value: fee }(destChain, message) returns (bytes32 receiptMessageId) {
-            emit ReceiptSent(receipt.requestId, receiptMessageId, fee, paidBy);
+            emit ReceiptSent(requestId, receiptMessageId, fee, paidBy);
         } catch (bytes memory reason) {
             // Undo the payment: return the account's fee, or give the sponsored slot back.
             if (paidBy == FeePayer.Account) {
+                // forge-lint: disable-next-line(arbitrary-send-eth) the DAO's own clone, which just paid this fee
                 (bool refunded,) = address(account).call{ value: fee }("");
                 if (!refunded) revert ReceiptRefundFailed();
             } else {
                 --sponsoredReceiptsUsed[address(account)];
             }
-            emit ReceiptNotSent(receipt.requestId, fee, reason);
+            emit ReceiptNotSent(requestId, fee, reason);
         }
     }
 

@@ -20,12 +20,18 @@ jobs:
           cache: npm
 
       - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.4
 
       - name: Install
         run: npm ci --no-audit --no-fund
 
       - name: Lint
         run: npm run lint
+
+      - name: Solidity lint, warnings are errors
+        working-directory: packages/foundry
+        run: forge lint --deny warnings
 
       - name: Type-check frontend
         run: npm run next:check-types

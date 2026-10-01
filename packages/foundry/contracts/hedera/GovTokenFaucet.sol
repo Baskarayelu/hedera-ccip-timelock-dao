@@ -97,6 +97,7 @@ contract GovTokenFaucet {
         if (lastClaimAt[msg.sender] != 0 && block.timestamp < next) revert ClaimTooSoon(next);
         lastClaimAt[msg.sender] = block.timestamp;
 
+        // forge-lint: disable-next-line(unused-return) new supply and serials are not needed for a fungible mint
         (int64 rc,,) = IHederaTokenService(HTS).mintToken(token, claimAmount, new bytes[](0));
         if (rc != HTS_SUCCESS) revert HtsFailed(rc);
 

@@ -147,6 +147,7 @@ contract DaoGovernor is
 
     /// @notice Moves HBAR out of the callback float.
     function withdrawFloat(address payable to, uint256 amount) external onlyGovernance {
+        // forge-lint: disable-next-line(arbitrary-send-eth) onlyGovernance: the recipient was approved by vote
         Address.sendValue(to, amount);
         emit FloatWithdrawn(to, amount);
     }

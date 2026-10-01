@@ -2,6 +2,7 @@
 pragma solidity ^0.8.28;
 
 import { TimelockController } from "@openzeppelin/contracts/governance/TimelockController.sol";
+import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { IHRC719 } from "hedera-forking/IHRC719.sol";
 
 import { Client } from "../ccip/Client.sol";
@@ -138,7 +139,7 @@ contract DaoTimelock is TimelockController, CcipReceiverBase {
         address executor = remoteExecutors[destChain];
         if (executor == address(0)) revert UnknownDestination(destChain);
 
-        uint64 validUntil = uint64(block.timestamp) + requestTtl;
+        uint64 validUntil = SafeCast.toUint64(block.timestamp) + requestTtl;
         CrossChainMessages.Request memory request;
         request.version = CrossChainMessages.VERSION;
         request.validUntil = validUntil;
@@ -159,7 +160,7 @@ contract DaoTimelock is TimelockController, CcipReceiverBase {
         bytes32 operationId = _executingOperation;
         outbound[messageId] = Outbound({
             destChain: destChain,
-            sentAt: uint64(block.timestamp),
+            sentAt: SafeCast.toUint64(block.timestamp),
             validUntil: validUntil,
             operationId: operationId,
             fee: fee
@@ -184,6 +185,7 @@ contract DaoTimelock is TimelockController, CcipReceiverBase {
 
     /// @notice Associates the treasury with an HTS token so it can hold it (HIP-719).
     function associateToken(address token) external onlySelfOrAdmin {
+        // forge-lint: disable-next-line(unused-return) success is read back through isAssociated()
         if (!IHRC719(token).isAssociated()) IHRC719(token).associate();
         if (!IHRC719(token).isAssociated()) revert AssociationFailed(token);
         emit TokenAssociated(token);
@@ -210,7 +212,7 @@ contract DaoTimelock is TimelockController, CcipReceiverBase {
         _inbound[receipt.requestId] = Inbound({
             status: receipt.status,
             executedAt: receipt.executedAt,
-            receivedAt: uint64(block.timestamp),
+            receivedAt: SafeCast.toUint64(block.timestamp),
             receiptMessageId: message.messageId
         });
         emit CrossChainReceipt(

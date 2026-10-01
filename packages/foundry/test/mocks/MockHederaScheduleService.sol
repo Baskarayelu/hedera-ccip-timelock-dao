@@ -137,7 +137,7 @@ contract MockHederaScheduleService {
         uint256 best = type(uint256).max;
         for (uint256 i; i < _schedules.length; ++i) {
             Scheduled storage s = _schedules[i];
-            if (s.status == Status.Pending && s.at <= block.timestamp && s.at < best) {
+            if (s.status == Status.Pending && s.at <= VM.getBlockTimestamp() && s.at < best) {
                 best = s.at;
                 index = i;
                 found = true;
@@ -156,7 +156,7 @@ contract MockHederaScheduleService {
             return;
         }
 
-        uint256 sweepTime = block.timestamp;
+        uint256 sweepTime = VM.getBlockTimestamp();
         VM.warp(s.at - BLOCK_CLOCK_LAG);
         uint256 gasBefore = gasleft();
         VM.prank(s.payer);
