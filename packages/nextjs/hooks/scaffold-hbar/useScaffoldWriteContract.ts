@@ -92,7 +92,7 @@ export function useScaffoldWriteContract<TContractName extends ContractName>(
   ) => {
     if (!deployedContractData) {
       notification.error(
-        "Target Contract is not deployed. Deploy your contracts first with `yarn hardhat:deploy` or `yarn foundry:deploy`.",
+        "Target Contract is not deployed. Deploy your DAO first with `npm run foundry:deploy:hedera`, then `npm run foundry:export`.",
       );
       return;
     }
@@ -156,7 +156,7 @@ export function useScaffoldWriteContract<TContractName extends ContractName>(
   ) => {
     if (!deployedContractData) {
       notification.error(
-        "Target Contract is not deployed. Deploy your contracts first with `yarn hardhat:deploy` or `yarn foundry:deploy`.",
+        "Target Contract is not deployed. Deploy your DAO first with `npm run foundry:deploy:hedera`, then `npm run foundry:export`.",
       );
       return;
     }

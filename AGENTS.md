@@ -1,138 +1,67 @@
 # Agent instructions
 
-Briefing for coding agents in this app (Cursor, Claude Code, Codex). Claude Code loads it through `CLAUDE.md`.
+Briefing for coding agents (Claude Code, Cursor, Codex) working in a project scaffolded from **hedera-ccip-timelock-dao**. Claude Code loads it through `CLAUDE.md`.
 
-This is a Scaffold-HBAR dApp: Next.js App Router, wallet connect, Debug Contracts, and Hedera networks (testnet, mainnet, local fork). The CLI may have left only Hardhat or only Foundry.
+The project is a DAO on Hedera:
 
-Use the package manager this project was created with (`packageManager` in the root `package.json`, or the lockfile). Examples use `yarn`; if the app was created with npm, swap `yarn <script>` for `npm run <script>`.
-
-## Which Solidity package
-
-- `packages/hardhat` exists → Hardhat (`hardhat-deploy`)
-- `packages/foundry` exists → Foundry (Forge scripts)
-- `packages/nextjs` is always the frontend (App Router, RainbowKit, Wagmi, Viem, DaisyUI)
-
-Follow only the flavor that is present.
-
-## Commands
-
-Package-prefixed scripts for package-specific work. Keep only truly cross-workspace commands unprefixed.
-
-```bash
-# Local chain + deploy + frontend (separate terminals)
-yarn hardhat:chain    # Hedera-forked Hardhat node on 8545
-yarn hardhat:deploy --network localhost
-yarn foundry:chain    # Anvil from the Foundry package
-yarn foundry:deploy
-yarn next:start       # http://localhost:3000
-
-# Frontend only
-yarn next:dev
-
-# Quality / build
-yarn lint
-yarn format
-yarn next:build
-yarn hardhat:compile
-yarn foundry:compile
-
-# Live networks
-yarn hardhat:deploy --network hederaTestnet   # or hederaMainnet
-yarn foundry:deploy --network hedera_testnet  # or hedera_mainnet
-yarn hardhat:verify -- HederaToken testnet [0xAddress]
-yarn foundry:verify:testnet
-
-# Deployer account
-yarn hardhat:account:generate
-yarn hardhat:account:import
-yarn hardhat:account
-```
-
-`yarn hardhat:deploy` without `--network localhost` targets the in-process `hardhat` network, not the long-running fork.
+- HTS governance token, wrapped 1:1 into an ERC20Votes token (`VoteToken`) for snapshot voting.
+- OpenZeppelin Governor (`DaoGovernor`) that queues and executes its own proposals through the Hedera Schedule Service (HIP-1215).
+- Timelock (`DaoTimelock`) that holds the treasury and sends cross-chain call batches over Chainlink CCIP.
+- On Base Sepolia, a shared `CrossChainExecutor` runs each batch from the sending DAO's own `DaoAccount` and sends a receipt back to Hedera.
 
 ## Layout
 
-### Hardhat
+| Path | What |
+|---|---|
+| `packages/foundry/contracts/hedera/` | Governor, timelock, vote token, HTS faucet, `HssScheduler` base |
+| `packages/foundry/contracts/remote/` | Executor, per-DAO account, demo `RemoteParameters` |
+| `packages/foundry/contracts/ccip/`, `shared/` | Minimal CCIP types/interfaces; the wire format both chains share |
+| `packages/foundry/test/` | Forge tests; `mocks/` holds the HSS, CCIP router and offline mirror-node doubles |
+| `packages/foundry/scripts-js/` | viem deploy scripts and the ABI exporter |
+| `packages/foundry/deployments/` | Committed deployment records (`296.json` Hedera testnet, `84532.json` Base Sepolia) |
+| `packages/nextjs/` | Next.js App Router frontend (RainbowKit, wagmi, viem, DaisyUI) |
 
-- Contracts: `packages/hardhat/contracts/`
-- Deploy scripts: `packages/hardhat/deploy/`
-- Tests: `packages/hardhat/test/`
-- Config: `packages/hardhat/hardhat.config.ts`
-- Tagged deploy: if `deployHederaToken.tags = ["HederaToken"]`, run `yarn hardhat:deploy --tags HederaToken`
+## Commands
 
-### Foundry
+Run them from the repository root.
 
-- Contracts: `packages/foundry/contracts/`
-- Deploy scripts: `packages/foundry/script/` (`Deploy.s.sol`, `DeployHederaToken.s.sol`, `DeployHtsTokenCreator.s.sol`)
-- Tests: `packages/foundry/test/`
-- Config: `packages/foundry/foundry.toml`
-- One contract: `yarn foundry:deploy --file DeployHederaToken.s.sol`
+```bash
+npm install
+npm run test                        # all Foundry tests
+npm run lint                        # Prettier, forge fmt, forge lint (needs Foundry 1.8.4+)
+npm run build                       # forge compile + next build
+npm run next:dev                    # http://localhost:3000
 
-### After deploy
-
-ABIs and addresses are written to `packages/nextjs/contracts/deployedContracts.ts`. Put third-party contracts in `packages/nextjs/contracts/externalContracts.ts`.
-
-Sample contracts on this starter: `HederaToken` (ERC-20) and `HtsTokenCreator` (HTS precompile at `0x167`).
-
-## Frontend contract interaction
-
-Hooks live in `packages/nextjs/hooks/scaffold-hbar`. Use the names that exist in the codebase:
-
-- `useScaffoldReadContract` — not `useScaffoldContractRead`
-- `useScaffoldWriteContract` — not `useScaffoldContractWrite`
-
-Also: `useScaffoldWatchContractEvent`, `useScaffoldEventHistory`, `useDeployedContractInfo`, `useScaffoldContract`, `useTransactor`.
-
-```typescript
-const { data: balance } = useScaffoldReadContract({
-  contractName: "HederaToken",
-  functionName: "balanceOf",
-  args: [connectedAddress],
-});
-
-const { writeContractAsync, isPending } = useScaffoldWriteContract({
-  contractName: "HederaToken",
-});
-
-await writeContractAsync({
-  functionName: "mint",
-  args: [connectedAddress, parseEther("1")],
-});
+npm run foundry:account:generate    # writes a fresh testnet key to packages/foundry/.env
+npm run foundry:deploy:remote       # Base Sepolia executor (shared; normally already deployed)
+npm run foundry:deploy:hedera       # a complete DAO on Hedera testnet
+npm run foundry:export              # regenerate packages/nextjs/contracts/deployedContracts.ts
 ```
 
-`HederaToken.mint` is `onlyOwner`. For HTS creation, `HtsTokenCreator.createToken` is payable (HTS fee via `msg.value`) and emits `TokenCreated`.
+Keys come from `.env.local` at the repository root, then `packages/foundry/.env`. Both are gitignored. Never print a key, and never commit either file.
 
-### UI
+## Hedera rules that break things silently
 
-Use `@scaffold-hbar-ui/components` for web3 UI: `Address`, `AddressInput`, `Balance`, `EtherInput`, `IntegerInput`.
+- **Two HBAR units.** Inside the EVM, `msg.value`, balances and CCIP fees are in **tinybar** (8 decimals). A JSON-RPC `value` is in **weibar** (18 decimals), so 1 HBAR is `1e8` in Solidity and `1e18` in a viem transaction.
+- **`block.timestamp` trails consensus time.** It is the start of the ~2 s record-file block, so a scheduled call due at second S can read S - 3. Schedule a callback that needs `block.timestamp >= T` at `T + BLOCK_CLOCK_MARGIN` (4 s).
+- **One `scheduleCall` per transaction.** A second one returns response code 373. A busy second returns 370 and still costs ~1.4M gas, so probe `hasScheduleCapacity` inside the transaction first; the relay's `eth_call` ignores throttles. `HssScheduler._scheduleSelfCall` does all of this; reuse it.
+- **Never send `msg.value` to 0x16b.** The call fails and burns all its gas.
+- **A scheduled call runs once.** If the payer cannot cover `gasLimit × gas price` when it fires, the schedule is consumed with no event and no retry. Keep the governor's float funded, and keep `queue`, `execute` and `rearm` permissionless.
+- **Auto-execution goes through `Governor.execute`**, not the timelock directly. OpenZeppelin's `onlyGovernance` checks only pass on that path.
+- **HTS association.** Accounts and contracts must be associated with an HTS token before receiving it. Contracts associate through the token's HIP-719 `associate()`, then confirm with `isAssociated()`.
+- **The relay reserves `gasLimit × price` up front.** Send Hedera transactions as legacy transactions with explicit gas limits; estimates undercount system-contract work.
+- **CCIP receivers must answer ERC-165** for `IAny2EVMMessageReceiver` (`0x85572ffb`), or the OffRamp drops the data. Size destination gas generously: a receiver that also sends a receipt needed ~362k gas on Base Sepolia.
 
-Use DaisyUI classes, not raw Tailwind when a DaisyUI component exists:
+## Tests
 
-```tsx
-<button className="btn btn-primary">Connect</button>
-```
+- `MockHederaScheduleService` is etched at `0x16b`. It models busy seconds, the per-transaction limit, the 62-day window, unfunded payers and the 3 s block-clock lag. Call `hss.newTransaction()` between simulated transactions and `hss.executeDue()` to let the network fire due schedules.
+- `MockCcipRouter` instances with different chain selectors model two chains in one EVM; `deliver(source, id)` plays the OffRamp.
+- HTS tests use hedera-forking's emulation with `OfflineMirrorNode`, so they run without network access.
 
-### Networks
+## Writing docs in this repository
 
-- Hardhat: `packages/hardhat/hardhat.config.ts` (`hederaTestnet` 296, `hederaMainnet` 295)
-- Foundry: `packages/foundry/foundry.toml` (`hedera_testnet`, `hedera_mainnet`)
-- Next.js: `packages/nextjs/scaffold.config.ts` (target networks, polling, RPC overrides, WalletConnect)
+When `create-scaffold-hbar` scaffolds with npm, it rewrites text files: commands for other package managers are rewritten for npm, and every "npm" followed by a word becomes "npm run" plus that word. In Markdown, write commands only as `npm run <script>`, `npm install` or `npx …`, and never put another word straight after "npm". The template gate in CI fails if any scaffolded Markdown differs from the source.
 
 ## Style
 
-| Style | Use |
-| --- | --- |
-| `UpperCamelCase` | types, components |
-| `lowerCamelCase` | variables, functions |
-| `CONSTANT_CASE` | constants |
-| `snake_case` | Hardhat deploy files and Foundry scripts |
-
-Next.js imports use the `~~` alias:
-
-```tsx
-import { useTargetNetwork } from "~~/hooks/scaffold-hbar";
-```
-
-App Router pages live under `packages/nextjs/app/`. Add `"use client"` when the page uses hooks.
-
-Prefer `type` over `interface`. No `T` prefix on types. Let TypeScript infer when it can. Comments should add information.
+Match the surrounding code. Solidity is formatted by `forge fmt` (120 columns) and linted by `forge lint`. TypeScript and JS are formatted by Prettier (120 columns). Comments say why, not what.

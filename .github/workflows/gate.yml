@@ -29,18 +29,33 @@ jobs:
         run: |
           npx --yes create-scaffold-hbar@latest gate-app \
             --template "${{ github.repository }}#${{ github.sha }}" \
-            --package-manager npm --yes --skip-install --skip-hedera-skills
+            --package-manager "npm" --yes --skip-install --skip-hedera-skills
           test -f gate-app/package.json
           test ! -f gate-app/template.json # the CLI consumes the manifest
           test -f gate-app/packages/foundry/.env.example
 
-      - name: The npm-mode rewrite left the docs readable
-        working-directory: gate-app
+      - uses: actions/checkout@v4
+        with:
+          path: source
+
+      - name: Files reach the developer unchanged
+        # Scaffolding with npm, the CLI rewrites text files (other package managers' commands, and every "npm <word>").
+        # Everything is written so that nothing matches; this fails if any scaffolded file differs from the
+        # source, apart from the files the CLI is meant to change.
         run: |
-          if grep -rn --include='*.md' -E 'npm run (create|i|ci|install)\b' . ; then
-            echo "::error::create-scaffold-hbar rewrote a command in the docs"
-            exit 1
-          fi
+          status=0
+          while IFS= read -r file; do
+            case "$file" in
+              package.json|*/package.json|template.json|.gitmodules|packages/foundry/lib/*) continue ;;
+            esac
+            [ -L "source/$file" ] && continue
+            if ! cmp -s "source/$file" "gate-app/$file"; then
+              echo "::error file=$file::create-scaffold-hbar changed this file"
+              diff -u "source/$file" "gate-app/$file" | head -40 || true
+              status=1
+            fi
+          done < <(cd source && git ls-files)
+          exit $status
 
       - name: Install
         working-directory: gate-app
@@ -52,7 +67,7 @@ jobs:
 
       - name: Contract tests
         working-directory: gate-app
-        run: npm test
+        run: npm run test
 
       - name: Build
         working-directory: gate-app

@@ -14,7 +14,7 @@ A [Scaffold-HBAR](https://github.com/hedera-dev/create-scaffold-hbar) template f
 npx create-scaffold-hbar@latest my-dao --template Baskarayelu/hedera-ccip-timelock-dao
 ```
 
-npm's `create` command works too: write `create scaffold-hbar@latest`, and with v7+ of npm put `--` before the CLI's flags so npm passes them on.
+npm's `create` command works too: write `create scaffold-hbar@latest`, and with npm (v7 and later), put `--` before the CLI's flags so they reach the CLI.
 
 Requirements: Node 20.18.3 or later, Git, and Foundry 1.8.4 or later (`foundryup`).
 
@@ -22,7 +22,7 @@ Requirements: Node 20.18.3 or later, Git, and Foundry 1.8.4 or later (`foundryup
 
 ```bash
 npm install
-npm test        # 60 Foundry tests: mocked HSS (busy seconds, payer balance, clock lag) and a two-chain CCIP mock
+npm run test    # 60 Foundry tests: mocked HSS (busy seconds, payer balance, clock lag) and a two-chain CCIP mock
 npm run lint
 npm run build
 ```
