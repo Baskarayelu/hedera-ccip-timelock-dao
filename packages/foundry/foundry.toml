@@ -7,11 +7,24 @@ fs_permissions = [
     { access = "read-write", path = "./" }
 ]
 ffi = true
+solc_version = "0.8.28"
 evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
 
-# Suppress style lints for API/modifier names we don't control
+# Style lints this codebase deliberately does not follow:
+# - mixed-case-*, pascal-case-struct: names that mirror external ABIs (CCIP `EVM2AnyMessage`, Hedera `ECDSA_secp256k1`).
+# - screaming-snake-case-immutable: public immutables are part of the read API (`ccipRouter()`, `claimAmount()`).
+# - unwrapped-modifier-logic, asm-keccak256: code-size/gas micro-optimisations traded for readability.
 [lint]
-exclude_lints = ["mixed-case-variable", "mixed-case-function"]
+exclude_lints = [
+    "mixed-case-variable",
+    "mixed-case-function",
+    "pascal-case-struct",
+    "screaming-snake-case-immutable",
+    "unwrapped-modifier-logic",
+    "asm-keccak256",
+]
 
 [rpc_endpoints]
 localhost = "http://127.0.0.1:8545"
