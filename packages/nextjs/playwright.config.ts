@@ -43,7 +43,8 @@ export default defineConfig({
     : {
         command: `npx next build && node e2e/restore-next-env.cjs && npx next start --port ${PORT}`,
         url: `http://localhost:${PORT}/api/health`,
-        reuseExistingServer: !process.env.CI,
+        // Always start our own fixture build: a server already on the port may be another app or a live build.
+        reuseExistingServer: false,
         timeout: 600_000,
         env: { NEXT_PUBLIC_DAO_FIXTURES: "true", NEXT_DIST_DIR: ".next-e2e" },
       },

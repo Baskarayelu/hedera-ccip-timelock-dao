@@ -37,7 +37,7 @@ A DAO made from this template runs on Hedera testnet, and a freshly scaffolded p
 You need:
 
 - Node 20.18.3 or later.
-- A Git user name and email that apply in the folder you run the CLI from. The CLI reads `git config user.name` and `user.email` there before it creates a repository, so set a global identity (`git config --global user.name "…"` and `git config --global user.email "…"`). If you keep identities per folder instead (an `includeIf` rule), make the folder a repository first so the rule applies: `mkdir work && cd work && git init`, then run the CLI there; the project gets its own repository inside, and you can delete `work/.git` afterwards.
+- A Git user name and email that apply in the folder you run the CLI from. The CLI reads `git config user.name` and `user.email` there before it creates a repository, so set a global identity (`git config --global user.name "…"` and `git config --global user.email "…"`). If you keep identities per folder instead (an `includeIf` rule), make a folder inside the path your rule matches a repository first, so the rule applies: `mkdir work && cd work && git init`, then run the CLI there; the project gets its own repository inside, and you can delete `work/.git` afterwards.
 - Foundry: install it with `curl -L https://foundry.paradigm.xyz | bash`, then run `foundryup`. `make` must be available too (on macOS it comes with the Xcode command line tools). Any version from 1.4 builds, tests and deploys; `npm run lint` needs 1.8.4 or later (`foundryup --install 1.8.4`). Before 1.8.4, builds print harmless `unknown id` warnings for lint rules that version does not know.
 
 Scaffold and run the template with npm, and leave the CLI's `--package-manager` option at its default; other package managers are not supported.
@@ -63,7 +63,7 @@ To use npm's `create` command instead, write `create scaffold-hbar@latest my-dao
 
 ### Deploy your own DAO
 
-The deploy uses the executor already on Base Sepolia, so you need only testnet HBAR: about 57 HBAR: 22 for the contracts and the token, 15 for the callback float and 20 for the treasury. The 22 includes creating the token, which sends 30 HBAR with its call and gets about 18 back, so have at least 60 on hand when you start. See [Costs](docs/costs.md).
+The deploy uses the executor already on Base Sepolia, so you need only testnet HBAR, about 57 in all: 22 for the contracts and the token, 15 for the callback float (the HBAR the governor pays the network with when it queues and executes proposals) and 20 for the treasury. The 22 includes creating the token, which sends 30 HBAR with its call and gets about 18 back, so have at least 60 on hand when you start. See [Costs](docs/costs.md).
 
 ```bash
 npm run foundry:account:generate   # writes a fresh key to packages/foundry/.env
@@ -122,7 +122,7 @@ Run these from the repository root.
 |---|---|
 | `npm run next:dev` | The app at http://localhost:3000 |
 | `npm run test` | 60 Foundry tests and the frontend's data-layer tests |
-| `npm run next:test:e2e` | Every page and state in the browser (run `npx playwright install chromium` once first) |
+| `npm run next:test:e2e` | Every page and state in the browser (run `npx playwright install chromium` once first). It builds into `packages/nextjs/.next-e2e` and serves on port 3100; set `E2E_PORT` to use another port. |
 | `npm run lint` | ESLint and Prettier, `forge fmt`, `forge lint` (Foundry 1.8.4 or later), and the docs check. Next.js prints a notice that `next lint` is deprecated; it needs no action. |
 | `npm run build` | Compile the contracts and build the app |
 | `npm run foundry:deploy:hedera` | Deploy a DAO to Hedera testnet |

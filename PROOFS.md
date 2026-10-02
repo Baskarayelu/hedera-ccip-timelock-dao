@@ -38,11 +38,18 @@ From `0x92947b03E93c5c9517A573Ca4270794fBE407218`, with `npm run foundry:deploy:
 | Fund the treasury (20 HBAR) | [0x18a97f32…](https://hashscan.io/testnet/transaction/0x18a97f32bad66b5faa81545737ae398606cff7e385d0e7cc2ca1ed2c5e269d87) |
 | Deployer renounces the admin role | [0x71d7e751…](https://hashscan.io/testnet/transaction/0x71d7e7510d9e5449bd7785840486c9d1c54b789404c6178f953804d50f96eb45) |
 
+After the four proposals, the deployer topped up the callback float and the treasury so that people trying the DAO have room to run their own proposals (anyone can send HBAR to either):
+
+| Top-up | Transaction |
+|---|---|
+| Callback float +100 HBAR | [0x7d84caf4…](https://hashscan.io/testnet/transaction/0x7d84caf49f15d194991c5304359bc3d01b9a2c007e99a88bf84a0f3785bdea0c) |
+| Treasury +50 HBAR | [0xc188dd09…](https://hashscan.io/testnet/transaction/0xc188dd09fc0c086b8c1932c1c7d1966f0735cbe7e25086018b03540a352f9b54) |
+
 ### Voting power
 
 Two voters, each through the app's *Voting power* page. Both accounts associate with new tokens automatically, so neither needed the association step.
 
-| Step | Voter A `0x9294…7218` (1,000 vHGOV) | Voter B `0x3f24…1Bd7` (600 vHGOV) |
+| Step | Voter A `0x9294…7218` (wrapped all 1,000 HGOV) | Voter B `0x3f24…1Bd7` (wrapped 600 of its 1,000 HGOV) |
 |---|---|---|
 | Claim 1,000 HGOV | [0xe6964a49…](https://hashscan.io/testnet/transaction/0xe6964a492ea01949d92e4e3e68d3ac029f82b9a975c03ae73d3a6aa76b90e4ac) | [0xd2a94d55…](https://hashscan.io/testnet/transaction/0xd2a94d55f75f78081f0f976bccb1d5b59063f26374e6a8e49841394dd9c29152) |
 | Approve | [0xc67b4f04…](https://hashscan.io/testnet/transaction/0xc67b4f0428aeabb76cc78fc26c55317b3f9404f34fca81f364403d8a3d6c0b23) | [0x22ff32bc…](https://hashscan.io/testnet/transaction/0x22ff32bccdfbd64e8427833652fa352ee8a788c3a84ca519a8987cf105107388) |

@@ -71,12 +71,12 @@ For a proposal with one action on Base Sepolia:
 
 | Who pays | What | HBAR |
 |---|---|---:|
-| Float | Queue callback | 1.33 |
+| Float | Queue callback | 1.34 |
 | Float | Execute callback, including the CCIP send | 0.39 |
 | Treasury | CCIP fee to Base Sepolia, quoted at execution | 1.14–1.17 measured |
 | The DAO's account on Base | Receipt back to Hedera | 0.000058–0.000059 ETH ([ReceiptSent](https://sepolia.basescan.org/tx/0xf71f51a3004a236b302da643b780033ecea278cd9eeb658518e4c72dcff14e66)) |
 
-A Hedera-only proposal costs the float 1.33 + 0.09 HBAR and no CCIP fee. A callback refused for a short float costs it 0.0272 HBAR. The executor on Base pays the receipt from the DAO's account when it holds enough ETH, otherwise from its sponsor pool (ten receipts per DAO).
+A Hedera-only proposal costs the float 1.34 + 0.09 HBAR and no CCIP fee. A callback refused for a short float costs it 0.0272 HBAR. The executor on Base pays the receipt from the DAO's account when it holds enough ETH, otherwise from its sponsor pool (ten receipts per DAO).
 
 ## Measured again on the official DAO
 
@@ -93,7 +93,7 @@ Its deployment cost 21.73 HBAR in gas and fees, plus the 35 HBAR of default floa
 
 ## Deploying a DAO
 
-Measured on the same test DAO:
+Measured on the same test DAO, billed at 82 tinybar per gas that day:
 
 | Step | Gas used | HBAR |
 |---|---:|---:|
