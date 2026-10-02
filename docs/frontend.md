@@ -9,7 +9,7 @@
 | Proposal | `/proposals/<id>` | Votes and your voting power at the snapshot, the decoded actions, a timeline with HashScan, CCIP explorer and Basescan links, and the fallback actions (Queue now, Execute now, Schedule it again). |
 | Voting power | `/voting-power` | Associate, claim, wrap (with an amount) and delegate (to yourself or another address), plus balances and unwrap. |
 
-![A proposal whose Base calls ran and whose receipt came back to Hedera](img/proposal-done.jpg)
+![A proposal on the testnet DAO that paid 5 USDC from the DAO's account on Base Sepolia, with every step linked and the receipt back on Hedera](img/proposal-done.jpg)
 
 ## States
 
@@ -36,7 +36,7 @@ Each proposal's state comes from `lib/dao/derive.ts`, which reads raw records: t
 | Quorum not reached | Defeated, and For + Abstain is below quorum at the snapshot | How many votes counted and how many were needed |
 | Cancelled | Canceled | When, and that the pending queue call was deleted |
 
-![The Voting power page: associate done, claim next, then wrap with an amount and delegate to yourself or someone else](img/voting-power.jpg)
+![The Voting power page on the testnet DAO: association not needed, the faucet in its cooldown, 400 HGOV still to wrap, and votes delegated to self](img/voting-power.jpg)
 
 The Voting power page has its own states: HGOV not associated (and no free automatic-association slot), association not needed, faucet claimed within its cooldown (the next claim time is read from the contract), wrapped but not delegated, and no Hedera account yet. Every page handles no wallet, the wrong network (with a switch button), and no DAO deployed yet.
 

@@ -19,6 +19,7 @@ function Step({
   title,
   body,
   note,
+  noteTone,
   children,
 }: {
   n: number;
@@ -26,6 +27,8 @@ function Step({
   title: string;
   body: string;
   note?: string;
+  /** "wait" marks a note about something the voter has to wait for; others are plain confirmations. */
+  noteTone?: "wait";
   children?: ReactNode;
 }) {
   const done = state === "done" || state === "optional";
@@ -42,7 +45,7 @@ function Step({
         <div className="setup-step-text">
           <span className="setup-step-title">{title}</span>
           <span className="setup-step-body">{body}</span>
-          {note && <span className="setup-step-note">{note}</span>}
+          {note && <span className={`setup-step-note${noteTone === "wait" ? " wait" : ""}`}>{note}</span>}
         </div>
       </div>
       {children}
@@ -176,6 +179,7 @@ function Steps({ voter }: { voter: VoterStatus }) {
           state={shown[1]}
           title={`Claim ${formatGov(voter.claimAmount, 0)} ${GOV_SYMBOL}`}
           body={`Testnet faucet: one claim per account every ${formatDuration(voter.claimCooldown)}.`}
+          noteTone="wait"
           note={
             coolingDown
               ? `Claimed at ${formatWhen(voter.lastClaimAt, now)}. Next claim from ${formatWhen(nextClaim, now)} (faucet cooldown, read from the contract).`

@@ -6,22 +6,30 @@ A [Scaffold-HBAR](https://github.com/hedera-dev/create-scaffold-hbar) template f
 - **No keeper.** Creating a proposal asks the Hedera Schedule Service (HIP-1215) to call the governor back when voting ends; that call queues the proposal and schedules the one that executes it when the timelock ends. If a scheduled call fails, anyone can finish the job from the app.
 - **Cross-chain actions with receipts.** A proposal can include calls on Base Sepolia. They travel in one Chainlink CCIP message, run from the DAO's own account there, and a receipt comes back to Hedera saying whether they ran. The CCIP fee is quoted at execution and capped by the vote.
 
-![Proposals page: five proposals in different states, with treasury, callback float, the DAO's Base account and the rules](docs/img/proposals.jpg)
+![Proposals page of the testnet DAO: a USDC payout and a parameter change on Base Sepolia, both with receipts back on Hedera, a proposal held by its fee cap, and a Hedera-only payment](docs/img/proposals.jpg)
 
-*Screens from the end-to-end tests (fixture data). [Every page and state](docs/frontend.md) is tested at 1440 and 390 px in light and dark.*
-
-> **Status:** in development for the Scaffold-HBAR template bounty. Contracts, tests, the frontend and CI are done, and the shared executor is live on Base Sepolia. The pre-deployed testnet DAO and its recorded governance run are next.
+*The live testnet DAO ([PROOFS.md](PROOFS.md)). [Every page and state](docs/frontend.md) is also tested with fixture data at 1440 and 390 px in light and dark.*
 
 ## Live on testnet
 
-Shared by every DAO made from this template (verified on Sourcify):
+A DAO made from this template runs on Hedera testnet, and a freshly scaffolded project opens it: `packages/nextjs/contracts/daoDeployment.ts` points at it until you deploy your own.
+
+| Hedera testnet | Address |
+|---|---|
+| `DaoGovernor` | [0x7d1e2fa702d137b019c44b9a562e04dd89cf7468](https://hashscan.io/testnet/contract/0x7d1e2fa702d137b019c44b9a562e04dd89cf7468) |
+| `DaoTimelock` (treasury) | [0xa895bf23411339f0bc19ee7859be455dcfb57d18](https://hashscan.io/testnet/contract/0xa895bf23411339f0bc19ee7859be455dcfb57d18) |
+| `VoteToken` (vHGOV) | [0x12a964056dbc26ad3206f03191daa7cf5d8c6bfa](https://hashscan.io/testnet/contract/0x12a964056dbc26ad3206f03191daa7cf5d8c6bfa) |
+| HGOV | HTS token `0.0.10822898` |
 
 | Base Sepolia | Address |
 |---|---|
-| `CrossChainExecutor` | [0x9B7691B0766A55D8509b07Cb633Ce281feE2A632](https://sepolia.basescan.org/address/0x9B7691B0766A55D8509b07Cb633Ce281feE2A632) |
-| `RemoteParameters` | [0x5f8b11a830ce09d87fA586c95e7C85FA57691cd9](https://sepolia.basescan.org/address/0x5f8b11a830ce09d87fA586c95e7C85FA57691cd9) |
+| The DAO's account | [0xa0E81699e1BC4f571d90A941b01420796192B124](https://sepolia.basescan.org/address/0xa0E81699e1BC4f571d90A941b01420796192B124) |
+| `CrossChainExecutor`, shared by every DAO from this template (verified on Sourcify) | [0x9B7691B0766A55D8509b07Cb633Ce281feE2A632](https://sepolia.basescan.org/address/0x9B7691B0766A55D8509b07Cb633Ce281feE2A632) |
+| `RemoteParameters`, shared demo target | [0x5f8b11a830ce09d87fA586c95e7C85FA57691cd9](https://sepolia.basescan.org/address/0x5f8b11a830ce09d87fA586c95e7C85FA57691cd9) |
 
-The pre-deployed Hedera DAO and a recorded run of its full governance loop will be listed here. CI re-checks every on-chain link in these docs daily (`npm run check:proofs`).
+[PROOFS.md](PROOFS.md) records four proposals run through the app by two voters, each queued and executed by the network with no keeper: a Hedera-only payment, a fee cap that stopped an execution, a parameter set on Base Sepolia, and a 5 USDC payout from the DAO's Base account, both with their receipts back on Hedera. CI re-checks every on-chain link in these docs daily (`npm run check:proofs`).
+
+**Try it with only Hedera testnet HBAR.** Scaffold the template ([Quick start](#quick-start)) and follow [Take part with a testnet wallet](#take-part-with-a-testnet-wallet). The DAO pays for the network's queue and execute calls and for CCIP fees; you pay about 3 HBAR of gas for the whole run. One faucet claim of 1,000 vHGOV passes a proposal on its own while fewer than 25,000 vHGOV exist (quorum is 4%).
 
 ## Quick start
 

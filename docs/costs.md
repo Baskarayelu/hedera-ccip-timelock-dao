@@ -63,7 +63,7 @@ Every callback measured, each run once by the network with no keeper:
 | *Schedule it again* | 1,495,029 | 1.24 |
 | *Execute now* (an HBAR transfer and one Base action) | 465,311 | 0.39, plus the CCIP fee from the treasury |
 
-Setting up and taking part once (claim, approve, wrap, delegate, propose, vote) spends about 2.8 HBAR, or 3.4 with an association. The relay also wants each transaction's `gasLimit × eth_gasPrice` on hand when it is sent; for a proposal that is about 2.1 HBAR. **About 10 HBAR covers every step** with room to spare.
+Setting up and taking part once (claim, approve, wrap, delegate, propose, vote) spends about 2.8 HBAR, or 3.4 with an association. On the official DAO it cost voter A 2.73 HBAR ([PROOFS.md](../PROOFS.md)). The relay also wants each transaction's `gasLimit × eth_gasPrice` on hand when it is sent; for a proposal that is about 2.1 HBAR. **About 10 HBAR covers every step** with room to spare.
 
 ## What a proposal costs the DAO
 
@@ -73,10 +73,23 @@ For a proposal with one action on Base Sepolia:
 |---|---|---:|
 | Float | Queue callback | 1.33 |
 | Float | Execute callback, including the CCIP send | 0.39 |
-| Treasury | CCIP fee to Base Sepolia, quoted at execution | 1.13–1.17 measured |
-| The DAO's account on Base | Receipt back to Hedera | 0.0000593 ETH ([ReceiptSent](https://sepolia.basescan.org/tx/0xf71f51a3004a236b302da643b780033ecea278cd9eeb658518e4c72dcff14e66)) |
+| Treasury | CCIP fee to Base Sepolia, quoted at execution | 1.14–1.17 measured |
+| The DAO's account on Base | Receipt back to Hedera | 0.000058–0.000059 ETH ([ReceiptSent](https://sepolia.basescan.org/tx/0xf71f51a3004a236b302da643b780033ecea278cd9eeb658518e4c72dcff14e66)) |
 
 A Hedera-only proposal costs the float 1.33 + 0.09 HBAR and no CCIP fee. A callback refused for a short float costs it 0.0272 HBAR. The executor on Base pays the receipt from the DAO's account when it holds enough ETH, otherwise from its sponsor pool (ten receipts per DAO).
+
+## Measured again on the official DAO
+
+The DAO in [PROOFS.md](../PROOFS.md) runs with the default limits (3,000,000 and 1,500,000). Its callbacks used the same gas as the test DAO's, and each was billed exactly gas used × 81 tinybar, the price that day:
+
+| Proposal | Queue callback | Execute callback | CCIP fee (treasury) | Receipt fee (DAO's Base account) |
+|---|---:|---:|---:|---:|
+| 1. Hedera-only payment | 1,602,335 gas | 108,205 gas | none | none |
+| 2. Fee cap below the quote | 1,609,952 gas | 200,018 gas, stopped by `FeeAboveCap` | not charged | none |
+| 3. Parameter on Base | 1,609,844 gas | 465,700 gas | 1.138 HBAR | 0.0000579 ETH |
+| 4. 5 USDC payout on Base | 1,609,928 gas | 465,784 gas | 1.139 HBAR | 0.0000587 ETH |
+
+Its deployment cost 21.73 HBAR in gas and fees, plus the 35 HBAR of default float and treasury funding.
 
 ## Deploying a DAO
 

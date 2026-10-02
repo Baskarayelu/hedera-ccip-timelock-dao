@@ -805,9 +805,12 @@ textarea.dinput {
   font-size: 14px;
 }
 .setup-step-note {
-  color: var(--warn);
+  color: var(--ink2);
   font-size: 13px;
   font-weight: 500;
+}
+.setup-step-note.wait {
+  color: var(--warn);
 }
 .setup-step-action {
   align-self: center;

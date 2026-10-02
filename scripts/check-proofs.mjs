@@ -11,6 +11,8 @@
  * Links that document a failure on purpose list their expected outcome in docs/proofs.json, either as the result
  * string or as { "result": …, "gasUsed": … } when the docs quote the gas a transaction used. A schedule can also
  * state { "gasLimit": …, "charged": … } (tinybar), which is how docs/costs.md proves what a scheduled call is billed.
+ * Any Hedera or Base transaction can also list "logsContain": hex fragments (an event topic, an error selector,
+ * an address) that must appear in its logs, so a link proves what happened and not only that it succeeded.
  *
  *   node scripts/check-proofs.mjs
  */
@@ -65,6 +67,19 @@ async function baseRpc(method, params) {
   return body.result;
 }
 
+/** Missing fragments of `want` in a list of logs (topics and data, compared without 0x and case). */
+function missingInLogs(logs, want = []) {
+  const text = (logs ?? [])
+    .map((l) => [...(l.topics ?? []), l.data ?? ""].join(""))
+    .join("")
+    .toLowerCase()
+    .replaceAll("0x", "");
+  const missing = want.filter(
+    (w) => !text.includes(w.toLowerCase().replace(/^0x/, "")),
+  );
+  return missing.length ? `logs lack ${missing.join(", ")}` : null;
+}
+
 const checks = {
   async "hedera-tx"(hash, expected = "SUCCESS") {
     const want =
@@ -76,7 +91,7 @@ const checks = {
       return `result ${r.result ?? `HTTP ${r._status}`}, expected ${want.result}`;
     if (want.gasUsed !== undefined && r.gas_used !== want.gasUsed)
       return `used ${r.gas_used} gas, docs say ${want.gasUsed}`;
-    return null;
+    return missingInLogs(r.logs, want.logsContain);
   },
   async "hedera-schedule"(id, expected = "SUCCESS") {
     const want =
@@ -94,7 +109,11 @@ const checks = {
       return `ran with ${ran?.result}, expected ${want.result}`;
     if (want.charged !== undefined && ran.charged_tx_fee !== want.charged)
       return `charged ${ran.charged_tx_fee} tinybar, docs say ${want.charged}`;
-    if (want.gasUsed !== undefined || want.gasLimit !== undefined) {
+    if (
+      want.gasUsed !== undefined ||
+      want.gasLimit !== undefined ||
+      want.logsContain
+    ) {
       // A scheduled contract call's result is filed under the transaction id that created the schedule.
       const r = await getJson(
         `${MIRROR}/api/v1/contracts/results/${ran.transaction_id}?nonce=${ran.nonce}`,
@@ -103,6 +122,7 @@ const checks = {
         return `used ${r.gas_used} gas, docs say ${want.gasUsed}`;
       if (want.gasLimit !== undefined && r.gas_limit !== want.gasLimit)
         return `gas limit ${r.gas_limit}, docs say ${want.gasLimit}`;
+      return missingInLogs(r.logs, want.logsContain);
     }
     return null;
   },
@@ -122,11 +142,11 @@ const checks = {
             : "pending";
     return state === expected ? null : `state ${state}, expected ${expected}`;
   },
-  async "base-tx"(hash) {
+  async "base-tx"(hash, expected = {}) {
     const receipt = await baseRpc("eth_getTransactionReceipt", [hash]);
-    return receipt?.status === "0x1"
-      ? null
-      : `status ${receipt?.status ?? "missing"}`;
+    if (receipt?.status !== "0x1")
+      return `status ${receipt?.status ?? "missing"}`;
+    return missingInLogs(receipt.logs, expected.logsContain);
   },
   async "base-address"(address) {
     const code = await baseRpc("eth_getCode", [address, "latest"]);
