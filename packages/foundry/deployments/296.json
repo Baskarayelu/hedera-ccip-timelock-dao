@@ -1,0 +1,58 @@
+{
+  "network": "hedera_testnet",
+  "chainId": 296,
+  "deployer": "0x92947b03E93c5c9517A573Ca4270794fBE407218",
+  "deployedAt": "2026-10-02T09:26:24.457Z",
+  "ccip": {
+    "router": "0x802C5F84eAD128Ff36fD6a3f8a418e339f467Ce4",
+    "chainSelector": "222782988166878823"
+  },
+  "settings": {
+    "tokenName": "DAO Governance",
+    "tokenSymbol": "HGOV",
+    "claimAmount": "1000000000",
+    "claimCooldown": "86400",
+    "votingDelay": 60,
+    "votingPeriod": 300,
+    "timelockDelay": "120",
+    "proposalThreshold": "0",
+    "quorumPercent": "4",
+    "autoQueueGas": "3000000",
+    "autoExecuteGas": "1500000",
+    "requestTtl": "86400",
+    "tokenCreateHbar": "30",
+    "governorFloatHbar": "15",
+    "treasuryHbar": "20"
+  },
+  "governanceToken": "0x0000000000000000000000000000000000A524F2",
+  "remote": {
+    "chainId": 84532,
+    "executor": "0x9b7691b0766a55d8509b07cb633ce281fee2a632",
+    "daoAccount": "0xa0E81699e1BC4f571d90A941b01420796192B124"
+  },
+  "contracts": {
+    "GovTokenFaucet": {
+      "address": "0xc3467144fea2d32329cb42d95e5190355834749a",
+      "txHash": "0x0acd35c21e7d6e641cf9e85a8ca01ffacebe8ca0eccfa856085c12640a42c0ef",
+      "blockNumber": "41256661"
+    },
+    "VoteToken": {
+      "address": "0x12a964056dbc26ad3206f03191daa7cf5d8c6bfa",
+      "txHash": "0x8e23a308512e404455949407fcbc339848b718718c5bc3fc9ad25203608fa5ee",
+      "blockNumber": "41256667"
+    },
+    "DaoTimelock": {
+      "address": "0xa895bf23411339f0bc19ee7859be455dcfb57d18",
+      "txHash": "0x9f9317dfff44d8c94932d6c35bbd671fffcda46acebe7abe48711916100188a9",
+      "blockNumber": "41256673"
+    },
+    "DaoGovernor": {
+      "address": "0x7d1e2fa702d137b019c44b9a562e04dd89cf7468",
+      "txHash": "0x620a1640ce9b756baa4ac6e90bc101828e7fab3521cb527c38dd3e0a3127218f",
+      "blockNumber": "41256676"
+    }
+  },
+  "transactions": {
+    "adminRenounced": "0x71d7e7510d9e5449bd7785840486c9d1c54b789404c6178f953804d50f96eb45"
+  }
+}

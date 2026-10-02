@@ -4,7 +4,21 @@
 
 /** Chain selectors are decimal strings because they exceed Number.MAX_SAFE_INTEGER. */
 const daoDeployment = {
-  hedera: null,
+  hedera: {
+    chainId: 296,
+    mirrorNode: "https://testnet.mirrornode.hedera.com",
+    ccipRouter: "0x802C5F84eAD128Ff36fD6a3f8a418e339f467Ce4",
+    ccipChainSelector: "222782988166878823",
+    deployedAt: 1790933184,
+    deployer: "0x92947b03E93c5c9517A573Ca4270794fBE407218",
+    governanceToken: "0x0000000000000000000000000000000000A524F2",
+    governanceSymbol: "HGOV",
+    governor: "0x7d1e2fa702d137b019c44b9a562e04dd89cf7468",
+    timelock: "0xa895bf23411339f0bc19ee7859be455dcfb57d18",
+    voteToken: "0x12a964056dbc26ad3206f03191daa7cf5d8c6bfa",
+    faucet: "0xc3467144fea2d32329cb42d95e5190355834749a",
+    remoteAccount: "0xa0E81699e1BC4f571d90A941b01420796192B124",
+  },
   base: {
     chainId: 84532,
     ccipRouter: "0xD3b06cEbF099CE7DA4AcCf578aaebFDBd6e88a93",
