@@ -255,7 +255,8 @@ contract CrossChainTest is DaoFixture {
     }
 
     function testFuzz_eachDaoActsOnlyThroughItsOwnAccount(address daoA, address daoB, uint64 chainB) public {
-        vm.assume(daoA != daoB && daoB != address(0));
+        // daoB must not be the executor itself, which is the one caller its accounts accept.
+        vm.assume(daoA != daoB && daoB != address(0) && daoB != address(executor));
         address accountA = executor.accountOf(HEDERA, daoA);
         address accountB = executor.accountOf(chainB, daoB);
         assertTrue(accountA != accountB);

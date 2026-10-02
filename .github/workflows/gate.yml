@@ -48,7 +48,9 @@ jobs:
           status=0
           while IFS= read -r file; do
             case "$file" in
-              package.json|*/package.json|template.json|.gitmodules|packages/foundry/lib/*) continue ;;
+              # package.json files and the manifest are the CLI's to change; its own install (with
+              # --legacy-peer-deps) rewrites the lockfile.
+              package.json|*/package.json|package-lock.json|template.json|.gitmodules|packages/foundry/lib/*) continue ;;
             esac
             [ -L "source/$file" ] && continue
             if ! cmp -s "source/$file" "gate-app/$file"; then

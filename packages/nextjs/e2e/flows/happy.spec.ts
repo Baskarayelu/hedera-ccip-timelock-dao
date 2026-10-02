@@ -17,7 +17,9 @@ async function fillProposal(page: Page) {
   await expect(page.getByLabel("Fee cap in HBAR")).toHaveValue("2.15");
 }
 
-test("happy path: set up voting power, propose a Base action, vote, and the network does the rest", async ({ page }) => {
+test("happy path: set up voting power, propose a Base action, vote, and the network does the rest", async ({
+  page,
+}) => {
   await openScenario(page, "fresh", "/voting-power");
 
   // 1. Associate (this account has no free automatic-association slot).
@@ -87,7 +89,9 @@ test("fee above the cap: Execute now refuses while the fee is high, then succeed
   await openFocusProposal(page, "feeAboveCap");
   await page.getByRole("button", { name: "Execute now" }).click();
   await expect(page.getByText(/the CCIP fee was 2\.31 HBAR, above the 2\.00 HBAR cap/)).toBeVisible();
-  await page.evaluate(() => (window as unknown as { __dao: { setFee: (t: string) => void } }).__dao.setFee("150000000"));
+  await page.evaluate(() =>
+    (window as unknown as { __dao: { setFee: (t: string) => void } }).__dao.setFee("150000000"),
+  );
   await expect(page.getByTestId("banner")).toContainText("within the 2.00 HBAR cap, so it can be executed now");
   await page.getByRole("button", { name: "Execute now" }).click();
   await expect(page.getByTestId("banner")).toContainText("not delivered yet");
@@ -122,7 +126,11 @@ test("cancel: the proposer can cancel while pending", async ({ page }) => {
 
 for (const variant of VARIANTS) {
   test(`new proposal screen ${variant.name}`, async ({ browser }) => {
-    const page = await browser.newPage({ viewport: variant.viewport, colorScheme: variant.colorScheme, timezoneId: "UTC" });
+    const page = await browser.newPage({
+      viewport: variant.viewport,
+      colorScheme: variant.colorScheme,
+      timezoneId: "UTC",
+    });
     await openScenario(page, "list", "/proposals/new");
     await fillProposal(page);
     await shot(page, `new-proposal--${variant.name}`);

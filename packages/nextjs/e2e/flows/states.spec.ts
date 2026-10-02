@@ -8,8 +8,10 @@ import { expect, test } from "@playwright/test";
 
 type Check = (page: import("@playwright/test").Page) => Promise<void>;
 
-const banner = (title: string | RegExp): Check => async page =>
-  expect(page.getByTestId("banner").first()).toContainText(title);
+const banner =
+  (title: string | RegExp): Check =>
+  async page =>
+    expect(page.getByTestId("banner").first()).toContainText(title);
 
 const PAGES: { name: string; scenario: string; path?: string; detail?: boolean; check: Check }[] = [
   // Screens
@@ -22,7 +24,12 @@ const PAGES: { name: string; scenario: string; path?: string; detail?: boolean; 
       await expect(page.getByText("18.92 HBAR")).toBeVisible(); // 20 HBAR less one 1.07 HBAR CCIP fee
     },
   },
-  { name: "detail-queued", scenario: "queued", detail: true, check: banner("Executes itself at 14:28:10, in 1 min 12 s") },
+  {
+    name: "detail-queued",
+    scenario: "queued",
+    detail: true,
+    check: banner("Executes itself at 14:28:10, in 1 min 12 s"),
+  },
   {
     name: "voting-power",
     scenario: "claim",
@@ -61,7 +68,11 @@ const PAGES: { name: string; scenario: string; path?: string; detail?: boolean; 
     check: banner("Your 1,000 vHGOV carry no votes yet"),
   },
   // Unhappy states: proposals list
-  { name: "state-empty", scenario: "empty", check: async page => expect(page.getByText("No proposals yet")).toBeVisible() },
+  {
+    name: "state-empty",
+    scenario: "empty",
+    check: async page => expect(page.getByText("No proposals yet")).toBeVisible(),
+  },
   {
     name: "state-wrong-network",
     scenario: "wrongNetwork",
@@ -147,10 +158,25 @@ const PAGES: { name: string; scenario: string; path?: string; detail?: boolean; 
       await expect(page.getByRole("button", { name: "Schedule it again" })).toBeEnabled();
     },
   },
-  { name: "state-executed-hedera", scenario: "executedLocal", detail: true, check: banner("Executed on Hedera at 14:28:10") },
-  { name: "state-defeated", scenario: "defeated", detail: true, check: banner("Defeated: more votes against than for") },
+  {
+    name: "state-executed-hedera",
+    scenario: "executedLocal",
+    detail: true,
+    check: banner("Executed on Hedera at 14:28:10"),
+  },
+  {
+    name: "state-defeated",
+    scenario: "defeated",
+    detail: true,
+    check: banner("Defeated: more votes against than for"),
+  },
   { name: "state-no-quorum", scenario: "noQuorum", detail: true, check: banner("Defeated: quorum not reached") },
-  { name: "state-canceled", scenario: "canceled", detail: true, check: banner("Cancelled by the proposer at 14:20:40") },
+  {
+    name: "state-canceled",
+    scenario: "canceled",
+    detail: true,
+    check: banner("Cancelled by the proposer at 14:20:40"),
+  },
 ];
 
 for (const variant of VARIANTS) {

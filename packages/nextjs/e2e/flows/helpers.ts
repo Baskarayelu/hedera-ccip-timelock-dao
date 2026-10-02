@@ -30,7 +30,10 @@ export async function openFocusProposal(page: Page, scenario: string) {
 
 /** Moves the fixture network's clock forward. */
 export async function advance(page: Page, seconds: number) {
-  await page.evaluate(s => (window as unknown as { __dao: { advance: (n: number) => void } }).__dao.advance(s), seconds);
+  await page.evaluate(
+    s => (window as unknown as { __dao: { advance: (n: number) => void } }).__dao.advance(s),
+    seconds,
+  );
 }
 
 export async function shot(page: Page, name: string) {
