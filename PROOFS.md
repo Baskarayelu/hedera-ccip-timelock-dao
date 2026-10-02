@@ -20,7 +20,7 @@ Settings: 1 minute voting delay, 5 minute vote, 2 minute timelock, 4% quorum; ca
 
 ### Deployment
 
-From `0x92947b03E93c5c9517A573Ca4270794fBE407218`, with `npm run foundry:deploy:hedera`. Since the last row, the deployer holds no role in the timelock, which administers itself: only proposals can change it.
+From `0x92947b03E93c5c9517A573Ca4270794fBE407218`, with `npm run foundry:deploy:hedera`. That account (voter A below) kept the timelock's admin role until the last row, at 18:43 UTC on 2 October: after the four proposals and the top-ups. The timelock's logs show it was never used: no role granted or revoked, no executor or token changed between the deployment and the renounce. Since then the deployer holds no role, and the timelock administers itself: only proposals can change it.
 
 | Step | Transaction |
 |---|---|
@@ -96,7 +96,7 @@ On the proposal's page, *Execute now* then showed "the CCIP fee was 1.13 HBAR, a
 | CCIP delivered it to Base Sepolia, 32 s later | [message 0x6149f6c7…](https://ccip.chain.link/msg/0x6149f6c7ca36d269662cc089d5a9fe21ebd0107014733d99841531bcc4cb8639) |
 | The DAO's account set `protocol.feeBps` to 30, and the executor sent a receipt paid from that account | [Base tx 0x68d095ac…](https://sepolia.basescan.org/tx/0x68d095ac6568d6c08ebfecae780cb76229e68154ca1b7591d1524a766e637886) |
 | The receipt travelled back after Base Sepolia finality | [message 0xcd76f3d0…](https://ccip.chain.link/msg/0xcd76f3d0087c761a8e6a0bdb9885808be78bf718a0a33d4ec930e813ee4e6d4a) |
-| The timelock recorded it (`CrossChainReceipt`, Executed), 23 min 53 s after the call ran on Base | [0xbb278a03…](https://hashscan.io/testnet/transaction/0xbb278a037e6560ed33a25787357b55a38c0c01ecd5731bf79b236c7011349bcd) |
+| The timelock recorded it (`CrossChainReceipt`, Executed), 23 min 54 s after the call ran on Base | [0xbb278a03…](https://hashscan.io/testnet/transaction/0xbb278a037e6560ed33a25787357b55a38c0c01ecd5731bf79b236c7011349bcd) |
 
 ## Proposal 4: a USDC payout on Base Sepolia
 
@@ -120,6 +120,6 @@ On the proposal's page, *Execute now* then showed "the CCIP fee was 1.13 HBAR, a
 | Voting ended → queued by the network | 5 s | 5 s |
 | Timelock ended → executed by the network | 4 s | 4 s |
 | Executed on Hedera → ran on Base Sepolia | 32 s | 35 s |
-| Ran on Base → receipt recorded on Hedera | 23 min 53 s | 22 min 12 s |
+| Ran on Base → receipt recorded on Hedera | 23 min 54 s | 22 min 12 s |
 
-The receipt leg is almost all Base Sepolia finality: the blocks with the calls finalized 23 min 34 s (proposal 3) and 21 min 32 s (proposal 4) after they ran, and CCIP took 19 s and 40 s after that. Gas and HBAR for every step are in [Costs](docs/costs.md).
+The receipt leg is almost all Base Sepolia finality: the blocks with the calls finalized 23 min 34 s (proposal 3) and 21 min 32 s (proposal 4) after they ran, and CCIP took 20 s and 41 s after that. Gas and HBAR for every step are in [Costs](docs/costs.md).

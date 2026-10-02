@@ -14,7 +14,8 @@
     "test": "forge test",
     "verify:testnet": "forge verify-contract --chain-id 296 --verifier sourcify",
     "verify:base-sepolia": "forge verify-contract --chain-id 84532 --verifier sourcify",
-    "postinstall": "shx cp -n .env.example .env"
+    "postinstall": "shx cp -n .env.example .env",
+    "verify:hedera": "node scripts-js/verifyHedera.js"
   },
   "dependencies": {
     "dotenv": "16.3.2",

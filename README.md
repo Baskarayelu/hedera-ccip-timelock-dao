@@ -70,11 +70,12 @@ npm run foundry:account:generate   # writes a fresh key to packages/foundry/.env
 # fund the printed address at https://portal.hedera.com/faucet
 npm run foundry:deploy:hedera      # token, vote token, timelock, governor, wiring, funding
 npm run foundry:export             # points the frontend at your DAO
+npm run foundry:verify:hedera      # publishes the contracts' source on Sourcify, so HashScan shows it
 ```
 
 To deploy from an existing testnet key, put `DEPLOYER_PRIVATE_KEY=0x…` in `.env.local` at the repository root instead; it takes precedence over `packages/foundry/.env`. Both files are gitignored. Voting periods, quorum, gas limits and HBAR amounts are set in `packages/foundry/.env`, which installing copies from `packages/foundry/.env.example`.
 
-The script prints the DAO's account address on Base Sepolia. Fund it with Base Sepolia ETH to pay for its own receipts (while it holds too little, the executor's sponsor pool pays for up to ten), and with any tokens the DAO should control there.
+The script prints the DAO's account address on Base Sepolia. Fund it with Base Sepolia ETH to pay for its own receipts (while it holds too little, the executor's sponsor pool, shared by every DAO, pays for up to ten while it has funds), and with any tokens the DAO should control there.
 
 ## How it works
 
@@ -125,7 +126,9 @@ Run these from the repository root.
 | `npm run next:test:e2e` | Every page and state in the browser (run `npx playwright install chromium` once first). It builds into `packages/nextjs/.next-e2e` and serves on port 3100; if that port is busy it stops at once and says so: set `E2E_PORT` to another port. |
 | `npm run lint` | ESLint and Prettier, `forge fmt`, `forge lint` (Foundry 1.8.4 or later), and the docs check. Next.js prints a notice that `next lint` is deprecated; it needs no action. |
 | `npm run build` | Compile the contracts and build the app |
+| `npm run foundry:account:generate` | Write a fresh testnet deployer key to `packages/foundry/.env` and print its address |
 | `npm run foundry:deploy:hedera` | Deploy a DAO to Hedera testnet |
+| `npm run foundry:verify:hedera` | Verify the deployed DAO's contracts on Sourcify |
 | `npm run foundry:export` | Regenerate the app's ABIs and addresses from `packages/foundry/deployments` |
 | `npm run check:proofs` | Re-verify every HashScan, CCIP explorer, Basescan and Sourcify link in the docs |
 

@@ -21,6 +21,7 @@
     "foundry:lint": "npm run lint -w @sh/foundry --",
     "foundry:test": "npm run test -w @sh/foundry --",
     "foundry:verify:testnet": "npm run verify:testnet -w @sh/foundry --",
+    "foundry:verify:hedera": "npm run verify:hedera -w @sh/foundry --",
     "next:build": "npm run build -w @sh/nextjs --",
     "next:check-types": "npm run check-types -w @sh/nextjs --",
     "next:dev": "npm run dev -w @sh/nextjs --",

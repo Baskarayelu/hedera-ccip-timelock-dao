@@ -53,6 +53,7 @@
     }
   },
   "transactions": {
-    "adminRenounced": "0x71d7e7510d9e5449bd7785840486c9d1c54b789404c6178f953804d50f96eb45"
+    "adminRenounced": "0x2cbaefb963fe024fc426f9b16e7c26fc8c65331fd2782957c2b01a9cbd318bef",
+    "adminRenounceNoOp": "0x71d7e7510d9e5449bd7785840486c9d1c54b789404c6178f953804d50f96eb45"
   }
 }

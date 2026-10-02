@@ -20,7 +20,7 @@ Measured on a test DAO deployed with a 12,000,000 gas limit for its queue callba
 
 Billing at 80% of the limit would have charged 7.97 HBAR for the second row. It charged 1.34.
 
-**What this means for gas limits.** A generous limit costs nothing extra. It only raises the balance that has to be there: the sender's for a transaction, the governor's float for a callback. The frontend sets each limit from the relay's estimate plus 25%, never below a per-call floor (`GAS_FLOOR` in `packages/nextjs/lib/dao/source.ts`) of about 1.25 times the gas measured below.
+**What this means for gas limits.** A generous limit costs nothing extra. It only raises the balance that has to be there: the sender's for a transaction, the governor's float for a callback. The frontend sets each limit from the relay's estimate plus 25%, never below a per-call floor (`GAS_FLOOR` in `packages/nextjs/lib/dao/source.ts`) of at least about 1.25 times the gas measured below (more for calls whose gas grows with the proposal).
 
 ## Callback gas limits
 
@@ -76,7 +76,7 @@ For a proposal with one action on Base Sepolia:
 | Treasury | CCIP fee to Base Sepolia, quoted at execution | 1.14–1.17 measured |
 | The DAO's account on Base | Receipt back to Hedera | 0.000058–0.000059 ETH ([ReceiptSent](https://sepolia.basescan.org/tx/0xf71f51a3004a236b302da643b780033ecea278cd9eeb658518e4c72dcff14e66)) |
 
-A Hedera-only proposal costs the float 1.34 + 0.09 HBAR and no CCIP fee. A callback refused for a short float costs it 0.0272 HBAR. The executor on Base pays the receipt from the DAO's account when it holds enough ETH, otherwise from its sponsor pool (ten receipts per DAO).
+A Hedera-only proposal costs the float 1.33 + 0.09 HBAR and no CCIP fee. A callback refused for a short float costs it 0.0272 HBAR. The executor on Base pays the receipt from the DAO's account when it holds enough ETH, otherwise from its sponsor pool (ten receipts per DAO).
 
 ## Measured again on the official DAO
 
@@ -89,7 +89,7 @@ The DAO in [PROOFS.md](../PROOFS.md) runs with the default limits (3,000,000 and
 | 3. Parameter on Base | 1,609,844 gas | 465,700 gas | 1.138 HBAR | 0.0000579 ETH |
 | 4. 5 USDC payout on Base | 1,609,928 gas | 465,784 gas | 1.139 HBAR | 0.0000587 ETH |
 
-Its deployment cost 21.73 HBAR in gas and fees, plus the 35 HBAR of default float and treasury funding.
+Its deployment cost 21.73 HBAR in gas and fees, plus the 35 HBAR of default float and treasury funding (and 0.02 HBAR for the admin renounce that had to be repeated, see [PROOFS.md](../PROOFS.md#deployment)).
 
 ## Deploying a DAO
 

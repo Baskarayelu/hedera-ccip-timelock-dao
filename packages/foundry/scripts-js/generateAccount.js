@@ -4,7 +4,7 @@
  *
  *   npm run foundry:account:generate
  */
-import { existsSync, readFileSync, writeFileSync } from "fs";
+import { chmodSync, existsSync, readFileSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
@@ -24,6 +24,8 @@ const next = /^DEPLOYER_PRIVATE_KEY=.*$/m.test(current)
   ? current.replace(/^DEPLOYER_PRIVATE_KEY=.*$/m, line)
   : `${current.trimEnd()}\n${line}\n`;
 writeFileSync(envPath, next, { mode: 0o600 });
+// `mode` only applies when the file is created, and installing already created .env from the example.
+chmodSync(envPath, 0o600);
 
 const { address } = privateKeyToAccount(key);
 console.log(`New deployer: ${address}`);
