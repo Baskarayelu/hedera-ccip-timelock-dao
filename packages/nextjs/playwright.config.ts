@@ -41,7 +41,7 @@ export default defineConfig({
   webServer: unitOnly
     ? undefined
     : {
-        command: `npx next build && npx next start --port ${PORT}`,
+        command: `npx next build && node e2e/restore-next-env.cjs && npx next start --port ${PORT}`,
         url: `http://localhost:${PORT}/api/health`,
         reuseExistingServer: !process.env.CI,
         timeout: 600_000,

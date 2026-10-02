@@ -26,10 +26,12 @@ jobs:
           git config --global user.email "template-gate@users.noreply.github.com"
 
       - name: Scaffold this commit with create-scaffold-hbar
+        # No --skip-install: the CLI installs dependencies its own way (npm install --legacy-peer-deps), which is
+        # what a developer gets. A dependency that only arrives through a peer, as `ws` once did, fails here.
         run: |
           npx --yes create-scaffold-hbar@latest gate-app \
             --template "${{ github.repository }}#${{ github.sha }}" \
-            --package-manager "npm" --yes --skip-install --skip-hedera-skills
+            --package-manager "npm" --network testnet --yes --skip-hedera-skills
           test -f gate-app/package.json
           test ! -f gate-app/template.json # the CLI consumes the manifest
           test -f gate-app/packages/foundry/.env.example
@@ -56,10 +58,6 @@ jobs:
             fi
           done < <(cd source && git ls-files)
           exit $status
-
-      - name: Install
-        working-directory: gate-app
-        run: npm install --no-audit --no-fund
 
       - name: Lint
         working-directory: gate-app

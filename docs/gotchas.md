@@ -54,7 +54,9 @@ Behaviour this template depends on, measured on Hedera testnet (services 0.77.2)
 
 **With npm, the CLI rewrites text files:** other package managers' commands become commands for npm, and every "npm" followed by a word becomes "npm run" plus that word, except for run, install, exec and ci. `scripts/check-docs.mjs` (part of `npm run lint`) and the template gate in CI keep this repository's files safe from that rewrite.
 
-**The CLI needs a Git identity** (`git config user.name` and `user.email`) in the directory where it runs, for its initial commit.
+**The CLI needs a Git identity** (`git config user.name` and `user.email`) in the directory where it runs, for its initial commit. It checks before that directory is a repository, so an identity Git applies only inside some repositories (an `includeIf` rule) is not seen; set a global one.
+
+**The CLI installs with `npm install --legacy-peer-deps`**, which drops packages that only arrive as peer dependencies. `ws` did: `isows` (used by viem's WebSocket transport, which RainbowKit imports) needs it at the top of `node_modules`, and without it every page failed to compile in a freshly scaffolded project. `ws` is therefore a direct dependency in the root `package.json`, and the template gate scaffolds through the CLI's own install so a gap like this fails in CI.
 
 ## Foundry
 

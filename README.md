@@ -29,33 +29,40 @@ A DAO made from this template runs on Hedera testnet, and a freshly scaffolded p
 
 [PROOFS.md](PROOFS.md) records four proposals run through the app by two voters, each queued and executed by the network with no keeper: a Hedera-only payment, a fee cap that stopped an execution, a parameter set on Base Sepolia, and a 5 USDC payout from the DAO's Base account, both with their receipts back on Hedera. CI re-checks every on-chain link in these docs daily (`npm run check:proofs`).
 
-**Try it with only Hedera testnet HBAR.** Scaffold the template ([Quick start](#quick-start)) and follow [Take part with a testnet wallet](#take-part-with-a-testnet-wallet). The DAO pays for the network's queue and execute calls and for CCIP fees; you pay about 3 HBAR of gas for the whole run. One faucet claim of 1,000 vHGOV passes a proposal on its own while fewer than 25,000 vHGOV exist (quorum is 4%).
+**Try it with only Hedera testnet HBAR.** Scaffold the template ([Quick start](#quick-start)) and follow [Take part with a testnet wallet](#take-part-with-a-testnet-wallet). The DAO pays for the network's queue and execute calls and for CCIP fees; you pay about 3 HBAR of gas for the whole run. One faucet claim (1,000 HGOV, wrapped into 1,000 vHGOV) passes a proposal on its own while fewer than 25,000 vHGOV exist (quorum is 4%).
 
 ## Quick start
 
-You need Node 20.18.3 or later, Git with a user name and email set, and Foundry 1.8.4 or later (`foundryup`, or `foundryup --install 1.8.4`).
+You need:
+
+- Node 20.18.3 or later.
+- A global Git user name and email (`git config --global user.name "…"` and `git config --global user.email "…"`). The CLI checks them in the folder you run it from, before any repository exists there, so an identity set only for some folders does not count.
+- Foundry (`foundryup`). Any version from 1.4 builds, tests and deploys; `npm run lint` needs 1.8.4 or later (`foundryup --install 1.8.4`).
+
+Scaffold and run the template with npm; other package managers are not supported.
 
 ```bash
 npx create-scaffold-hbar@latest my-dao --template Baskarayelu/hedera-ccip-timelock-dao
 cd my-dao
-npm install
 npm run next:dev
 ```
 
-Open http://localhost:3000.
+The CLI asks whether to add the Hedera Skills agent guides (either answer works) and which network to use: choose **Testnet**. It installs the dependencies itself. To skip the questions, as CI and coding agents must, add `--yes --skip-hedera-skills --network testnet`.
+
+Open http://localhost:3000. The app opens the live testnet DAO.
 
 To use npm's `create` command instead, write `create scaffold-hbar@latest my-dao -- --template Baskarayelu/hedera-ccip-timelock-dao` after `npm`: the `--` passes the flags through to the CLI.
 
 ### Take part with a testnet wallet
 
-1. **Get a testnet account.** Create an ECDSA account at [portal.hedera.com](https://portal.hedera.com) and fund it from the [faucet](https://portal.hedera.com/faucet). About 10 HBAR covers every step below; they spend about 3 ([Costs](docs/costs.md)). Add Hedera testnet to your wallet (chain id 296, RPC `https://testnet.hashio.io/api`) and import the account's key, or use the app's burner wallet for a quick look.
-2. **Voting power** page: associate HGOV with your account (the page says when your account does not need to), claim 1,000 HGOV from the faucet, wrap them into vHGOV, and delegate to yourself.
+1. **Get a testnet account.** Create an ECDSA account at [portal.hedera.com](https://portal.hedera.com) and fund it from the [faucet](https://portal.hedera.com/faucet). About 10 HBAR covers every step below; they spend about 3 ([Costs](docs/costs.md)). Add Hedera testnet to your wallet (chain id 296, RPC `https://testnet.hashio.io/api`) and import the account's private key in its HEX form (the portal shows HEX and DER; wallets take the HEX one). The app's burner wallet is for looking around: it starts with no HBAR and no Hedera account, so it can act only after you send HBAR to its address from the faucet.
+2. **Voting power** page: press **Claim** to get 1,000 HGOV from the DAO's own faucet (once per account every 24 hours), wrap them into vHGOV, and delegate to yourself. An association step appears only if your account needs one.
 3. **New proposal**: add a Base action such as *Set a parameter*. The page quotes the CCIP fee live and proposes a cap of twice the quote. Submit.
-4. **Vote** on the proposal's page once voting opens (1 minute later in the demo settings), then watch it: the network queues it 5 seconds after voting ends, executes it after the 2-minute timelock, and the timeline links each step to HashScan, the CCIP explorer and Basescan. The receipt reaches Hedera after Base Sepolia finalizes the block, which the page estimates live.
+4. **Vote** on the proposal's page once voting opens, 1 minute after you propose; voting stays open for 5 minutes. Then watch it: the network queues it 5 seconds after voting ends and executes it 2 minutes later (the timelock), about 8 minutes after you proposed. A Base action runs on Base Sepolia within a minute of that, and its receipt reaches Hedera once Base Sepolia finalizes the block, which took 20 to 25 minutes during our runs; the page estimates it live. The timeline links each step to HashScan, the CCIP explorer and Basescan.
 
 ### Deploy your own DAO
 
-The deploy uses the executor already on Base Sepolia, so you need only testnet HBAR: about 60 HBAR, of which 22 pays for the contracts and the token and the rest funds the callback float (15) and the treasury (20). See [Costs](docs/costs.md).
+The deploy uses the executor already on Base Sepolia, so you need only testnet HBAR: about 60 HBAR, of which 22 pays for the contracts and the token and the rest funds the callback float (15) and the treasury (20). Token creation also sends 30 HBAR with its call and gets back what the network does not charge (about 18), so start with at least 60. See [Costs](docs/costs.md).
 
 ```bash
 npm run foundry:account:generate   # writes a fresh key to packages/foundry/.env
@@ -64,7 +71,7 @@ npm run foundry:deploy:hedera      # token, vote token, timelock, governor, wiri
 npm run foundry:export             # points the frontend at your DAO
 ```
 
-To deploy from an existing testnet key, put `DEPLOYER_PRIVATE_KEY=0x…` in `.env.local` at the repository root instead; it takes precedence over `packages/foundry/.env`. Both files are gitignored. Voting periods, quorum, gas limits and HBAR amounts are set in `packages/foundry/.env` (see `.env.example`).
+To deploy from an existing testnet key, put `DEPLOYER_PRIVATE_KEY=0x…` in `.env.local` at the repository root instead; it takes precedence over `packages/foundry/.env`. Both files are gitignored. Voting periods, quorum, gas limits and HBAR amounts are set in `packages/foundry/.env`, which installing copies from `packages/foundry/.env.example`.
 
 The script prints the DAO's account address on Base Sepolia. Fund it with Base Sepolia ETH to pay for its own receipts (the executor sponsors the first ten), and with any tokens the DAO should control there.
 
