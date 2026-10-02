@@ -14,20 +14,21 @@ A [Scaffold-HBAR](https://github.com/hedera-dev/create-scaffold-hbar) template f
 
 A DAO made from this template runs on Hedera testnet, and a freshly scaffolded project opens it: `packages/nextjs/contracts/daoDeployment.ts` points at it until you deploy your own.
 
-| Hedera testnet | Address |
-|---|---|
-| `DaoGovernor` | [0x7d1e2fa702d137b019c44b9a562e04dd89cf7468](https://hashscan.io/testnet/contract/0x7d1e2fa702d137b019c44b9a562e04dd89cf7468) |
-| `DaoTimelock` (treasury) | [0xa895bf23411339f0bc19ee7859be455dcfb57d18](https://hashscan.io/testnet/contract/0xa895bf23411339f0bc19ee7859be455dcfb57d18) |
-| `VoteToken` (vHGOV) | [0x12a964056dbc26ad3206f03191daa7cf5d8c6bfa](https://hashscan.io/testnet/contract/0x12a964056dbc26ad3206f03191daa7cf5d8c6bfa) |
-| HGOV | HTS token `0.0.10822898` |
+| Hedera testnet | Address | Source |
+|---|---|---|
+| `DaoGovernor` | [0x7d1e2fa702d137b019c44b9a562e04dd89cf7468](https://hashscan.io/testnet/contract/0x7d1e2fa702d137b019c44b9a562e04dd89cf7468) | [Sourcify](https://repo.sourcify.dev/296/0x7d1e2fa702d137b019c44b9a562e04dd89cf7468) |
+| `DaoTimelock` (treasury) | [0xa895bf23411339f0bc19ee7859be455dcfb57d18](https://hashscan.io/testnet/contract/0xa895bf23411339f0bc19ee7859be455dcfb57d18) | [Sourcify](https://repo.sourcify.dev/296/0xa895bf23411339f0bc19ee7859be455dcfb57d18) |
+| `VoteToken` (vHGOV) | [0x12a964056dbc26ad3206f03191daa7cf5d8c6bfa](https://hashscan.io/testnet/contract/0x12a964056dbc26ad3206f03191daa7cf5d8c6bfa) | [Sourcify](https://repo.sourcify.dev/296/0x12a964056dbc26ad3206f03191daa7cf5d8c6bfa) |
+| `GovTokenFaucet` | [0xc3467144fea2d32329cb42d95e5190355834749a](https://hashscan.io/testnet/contract/0xc3467144fea2d32329cb42d95e5190355834749a) | [Sourcify](https://repo.sourcify.dev/296/0xc3467144fea2d32329cb42d95e5190355834749a) |
+| HGOV | HTS token `0.0.10822898` | |
 
-| Base Sepolia | Address |
-|---|---|
-| The DAO's account | [0xa0E81699e1BC4f571d90A941b01420796192B124](https://sepolia.basescan.org/address/0xa0E81699e1BC4f571d90A941b01420796192B124) |
-| `CrossChainExecutor`, shared by every DAO from this template (verified on Sourcify) | [0x9B7691B0766A55D8509b07Cb633Ce281feE2A632](https://sepolia.basescan.org/address/0x9B7691B0766A55D8509b07Cb633Ce281feE2A632) |
-| `RemoteParameters`, shared demo target | [0x5f8b11a830ce09d87fA586c95e7C85FA57691cd9](https://sepolia.basescan.org/address/0x5f8b11a830ce09d87fA586c95e7C85FA57691cd9) |
+| Base Sepolia | Address | Source |
+|---|---|---|
+| The DAO's account (a minimal clone of `DaoAccount`) | [0xa0E81699e1BC4f571d90A941b01420796192B124](https://sepolia.basescan.org/address/0xa0E81699e1BC4f571d90A941b01420796192B124) | |
+| `CrossChainExecutor`, shared by every DAO from this template | [0x9B7691B0766A55D8509b07Cb633Ce281feE2A632](https://sepolia.basescan.org/address/0x9B7691B0766A55D8509b07Cb633Ce281feE2A632) | [Sourcify](https://repo.sourcify.dev/84532/0x9B7691B0766A55D8509b07Cb633Ce281feE2A632) |
+| `RemoteParameters`, shared demo target | [0x5f8b11a830ce09d87fA586c95e7C85FA57691cd9](https://sepolia.basescan.org/address/0x5f8b11a830ce09d87fA586c95e7C85FA57691cd9) | [Sourcify](https://repo.sourcify.dev/84532/0x5f8b11a830ce09d87fA586c95e7C85FA57691cd9) |
 
-[PROOFS.md](PROOFS.md) records four proposals run through the app by two voters, each queued by the network and then executed by it with no keeper, or, for the fee-cap case, stopped: a Hedera-only payment, a fee cap that stopped an execution, a parameter set on Base Sepolia, and a 5 USDC payout from the DAO's Base account, both with their receipts back on Hedera. CI re-checks every on-chain link in these docs daily (`npm run check:proofs`).
+[PROOFS.md](PROOFS.md) records four proposals run through the app by two voters, each queued by the network and then executed by it with no keeper, or, for the fee-cap case, stopped: a Hedera-only payment, a fee cap that stopped an execution, a parameter set on Base Sepolia, and a 5 USDC payout from the DAO's Base account, the last two with their receipts back on Hedera. CI re-checks every on-chain link in these docs daily (`npm run check:proofs`).
 
 **Try it with only Hedera testnet HBAR.** Scaffold the template ([Quick start](#quick-start)) and follow [Take part with a testnet wallet](#take-part-with-a-testnet-wallet). The DAO pays for the network's queue and execute calls and for CCIP fees; you pay about 3 HBAR of gas for the whole run. One faucet claim (1,000 HGOV, wrapped into 1,000 vHGOV) passes a proposal on its own while fewer than 25,000 vHGOV exist (quorum is 4%).
 
@@ -36,8 +37,8 @@ A DAO made from this template runs on Hedera testnet, and a freshly scaffolded p
 You need:
 
 - Node 20.18.3 or later.
-- A Git user name and email that apply in the folder you run the CLI from. The CLI reads `git config user.name` and `user.email` there before it creates a repository, so set a global identity (`git config --global user.name "…"` and `git config --global user.email "…"`), or run the CLI from inside a repository where your per-folder identity applies.
-- Foundry: install it with `curl -L https://foundry.paradigm.xyz | bash`, then run `foundryup`. Any version from 1.4 builds, tests and deploys; `npm run lint` needs 1.8.4 or later (`foundryup --install 1.8.4`). Before 1.8.4, builds print harmless `unknown id` warnings for lint rules that version does not know.
+- A Git user name and email that apply in the folder you run the CLI from. The CLI reads `git config user.name` and `user.email` there before it creates a repository, so set a global identity (`git config --global user.name "…"` and `git config --global user.email "…"`). If you keep identities per folder instead (an `includeIf` rule), make the folder a repository first so the rule applies: `mkdir work && cd work && git init`, then run the CLI there; the project gets its own repository inside, and you can delete `work/.git` afterwards.
+- Foundry: install it with `curl -L https://foundry.paradigm.xyz | bash`, then run `foundryup`. `make` must be available too (on macOS it comes with the Xcode command line tools). Any version from 1.4 builds, tests and deploys; `npm run lint` needs 1.8.4 or later (`foundryup --install 1.8.4`). Before 1.8.4, builds print harmless `unknown id` warnings for lint rules that version does not know.
 
 Scaffold and run the template with npm, and leave the CLI's `--package-manager` option at its default; other package managers are not supported.
 
@@ -58,11 +59,11 @@ To use npm's `create` command instead, write `create scaffold-hbar@latest my-dao
 1. **Get a testnet account.** Create an ECDSA account at [portal.hedera.com](https://portal.hedera.com) and fund it from the [faucet](https://portal.hedera.com/faucet). About 10 HBAR covers every step below; they spend about 3 ([Costs](docs/costs.md)). Add Hedera testnet to your wallet (chain id 296, RPC `https://testnet.hashio.io/api`, currency symbol HBAR, explorer `https://hashscan.io/testnet`) and import the account's private key in its HEX form (the portal shows HEX and DER; wallets take the HEX one). The app's burner wallet is for looking around: it starts with no HBAR and no Hedera account, so it can act only after you send HBAR to its address from the faucet.
 2. **Voting power** page: press **Claim** to get 1,000 HGOV from the DAO's own faucet (once per account every 24 hours), then **Approve and wrap** to turn them into vHGOV (two wallet confirmations), then **Delegate to myself**: four confirmations in all. An association step appears first only if your account needs one.
 3. **New proposal**: add a Base action such as *Set a parameter*. The page quotes the CCIP fee live and proposes a cap of twice the quote. Submit.
-4. **Vote** on the proposal's page once voting opens, 1 minute after you propose; voting stays open for 5 minutes. Then watch it: the network queues it 5 seconds after voting ends and executes it 2 minutes later (the timelock), about 8 minutes after you proposed. A Base action runs on Base Sepolia within a minute of that, and its receipt reaches Hedera once Base Sepolia finalizes the block, which took 20 to 25 minutes during our runs; the page estimates it live. The timeline links each step to HashScan, the CCIP explorer and Basescan.
+4. **Vote** on the proposal's page once voting opens, 1 minute after you propose; voting stays open for 5 minutes. Then watch it: the network queues it 5 seconds after voting ends and executes it 2 minutes later (the timelock), about 8 minutes after you proposed. A Base action runs on Base Sepolia within a minute of that, and its receipt reaches Hedera once Base Sepolia finalizes the block, which took 22 to 24 minutes during our runs; the page estimates it live. The timeline links each step to HashScan, the CCIP explorer and Basescan.
 
 ### Deploy your own DAO
 
-The deploy uses the executor already on Base Sepolia, so you need only testnet HBAR: about 57 HBAR: 22 for the contracts and the token, 15 for the callback float and 20 for the treasury. Token creation also sends 30 HBAR with its call and gets back what the network does not charge (about 18), so start with at least 60. See [Costs](docs/costs.md).
+The deploy uses the executor already on Base Sepolia, so you need only testnet HBAR: about 57 HBAR: 22 for the contracts and the token, 15 for the callback float and 20 for the treasury. The 22 includes creating the token, which sends 30 HBAR with its call and gets about 18 back, so have at least 60 on hand when you start. See [Costs](docs/costs.md).
 
 ```bash
 npm run foundry:account:generate   # writes a fresh key to packages/foundry/.env
@@ -93,6 +94,15 @@ sequenceDiagram
 
 [Architecture](docs/architecture.md) covers the contracts, the full sequence and the frontend's data layer. [Threat model](docs/threat-model.md) lists what is protected and how, including what is demo-only.
 
+### If a scheduled call fails
+
+A scheduled call runs once. If it fails, the proposal's page says why (for example a CCIP fee above the cap the proposal was voted with, a treasury too small for its transfers plus the fee, or a callback float too low to pay the network) and offers two ways on:
+
+- **Schedule it again** asks the network to try once more. Your wallet pays to schedule it; the float pays for the run.
+- **Queue now** or **Execute now** does the step straight from your wallet.
+
+Before sending either, the app checks that the transaction would succeed; if a reason the DAO's contracts define would stop it, the page shows that reason and sends nothing. The Proposals page warns when the float is too low for the next call, and anyone can top it up by sending HBAR to the governor. [Costs](docs/costs.md#callback-gas-limits) explains what the float must hold.
+
 ## Project layout
 
 | Path | What |
@@ -113,11 +123,11 @@ Run these from the repository root.
 | `npm run next:dev` | The app at http://localhost:3000 |
 | `npm run test` | 60 Foundry tests and the frontend's data-layer tests |
 | `npm run next:test:e2e` | Every page and state in the browser (run `npx playwright install chromium` once first) |
-| `npm run lint` | ESLint and Prettier, `forge fmt`, `forge lint`, and the docs check |
+| `npm run lint` | ESLint and Prettier, `forge fmt`, `forge lint` (Foundry 1.8.4 or later), and the docs check. Next.js prints a notice that `next lint` is deprecated; it needs no action. |
 | `npm run build` | Compile the contracts and build the app |
 | `npm run foundry:deploy:hedera` | Deploy a DAO to Hedera testnet |
 | `npm run foundry:export` | Regenerate the app's ABIs and addresses from `packages/foundry/deployments` |
-| `npm run check:proofs` | Re-verify every HashScan, CCIP explorer and Basescan link in the docs |
+| `npm run check:proofs` | Re-verify every HashScan, CCIP explorer, Basescan and Sourcify link in the docs |
 
 ## Docs
 

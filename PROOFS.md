@@ -49,7 +49,7 @@ Two voters, each through the app's *Voting power* page. Both accounts associate 
 | Wrap | [0x9ec7aca7…](https://hashscan.io/testnet/transaction/0x9ec7aca7cc6a1f968e5231e5466f993e67461d77d523499738faa46e5d65e859) | [0x42789ca0…](https://hashscan.io/testnet/transaction/0x42789ca0240ba4852b5147a1f9398c81775ee572b72ff19f28b1430c2e02f647) |
 | Delegate to self | [0xe743de65…](https://hashscan.io/testnet/transaction/0xe743de653ed6705e6849251d7f5a290eb5cd6374a039c2eca46369cd5adafb98) | [0x68fd0786…](https://hashscan.io/testnet/transaction/0x68fd07863ff07314dcc6a49d768d36b36b078288afca9c71032de3e3fde1dac9) |
 
-Voter A proposed all four proposals; both voted For on each.
+Voter A proposed all four proposals; both voted For on each. Voter A's four setup transactions cost 1.42 HBAR in gas; each proposal then cost them about 1.24 HBAR to create and 0.07 HBAR to vote on, so setup, one proposal and its vote came to 2.72 HBAR (proposal 1) or 2.73 HBAR (proposal 3).
 
 ## Proposal 1: a Hedera-only payment
 
@@ -114,4 +114,4 @@ On the proposal's page, *Execute now* then showed "the CCIP fee was 1.13 HBAR, a
 | Executed on Hedera → ran on Base Sepolia | 32 s | 35 s |
 | Ran on Base → receipt recorded on Hedera | 23 min 53 s | 22 min 12 s |
 
-The receipt leg is almost all Base Sepolia finality, which ran 23–25 minutes behind its latest block during these runs; CCIP itself took 19–40 s after finality. Gas and HBAR for every step are in [Costs](docs/costs.md).
+The receipt leg is almost all Base Sepolia finality: the blocks with the calls finalized 23 min 34 s (proposal 3) and 21 min 32 s (proposal 4) after they ran, and CCIP took 19 s and 40 s after that. Gas and HBAR for every step are in [Costs](docs/costs.md).

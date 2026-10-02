@@ -7,6 +7,7 @@
  * - ccip.chain.link/msg/0x…              the CCIP explorer knows the message and its execution state (success by default)
  * - sepolia.basescan.org/tx/0x…          the Base Sepolia receipt has status 1
  * - sepolia.basescan.org/address/0x…     code exists at that address on Base Sepolia
+ * - repo.sourcify.dev/<chain>/0x…         Sourcify holds an exact match of the contract's source
  *
  * Links that document a failure on purpose list their expected outcome in docs/proofs.json, either as the result
  * string or as { "result": …, "gasUsed": … } when the docs quote the gas a transaction used. A schedule can also
@@ -43,6 +44,7 @@ const PATTERNS = [
     kind: "base-address",
     re: /sepolia\.basescan\.org\/address\/(0x[0-9a-fA-F]{40})/g,
   },
+  { kind: "sourcify", re: /repo\.sourcify\.dev\/(\d+\/0x[0-9a-fA-F]{40})/g },
 ];
 
 const expectations = JSON.parse(
@@ -147,6 +149,15 @@ const checks = {
     if (receipt?.status !== "0x1")
       return `status ${receipt?.status ?? "missing"}`;
     return missingInLogs(receipt.logs, expected.logsContain);
+  },
+  async sourcify(id) {
+    const [chain, address] = id.split("/");
+    const c = await getJson(
+      `https://sourcify.dev/server/v2/contract/${chain}/${address}`,
+    );
+    return c.match === "exact_match"
+      ? null
+      : `Sourcify match ${c.match ?? `none (HTTP ${c._status})`}`;
   },
   async "base-address"(address) {
     const code = await baseRpc("eth_getCode", [address, "latest"]);

@@ -63,7 +63,7 @@ Every callback measured, each run once by the network with no keeper:
 | *Schedule it again* | 1,495,029 | 1.24 |
 | *Execute now* (an HBAR transfer and one Base action) | 465,311 | 0.39, plus the CCIP fee from the treasury |
 
-Setting up and taking part once (claim, approve, wrap, delegate, propose, vote) spends about 2.8 HBAR, or 3.4 with an association. On the official DAO it cost voter A 2.73 HBAR ([PROOFS.md](../PROOFS.md)). The relay also wants each transaction's `gasLimit × eth_gasPrice` on hand when it is sent; for a proposal that is about 2.1 HBAR. **About 10 HBAR covers every step** with room to spare.
+Setting up and taking part once (claim, approve, wrap, delegate, propose, vote) spends about 2.8 HBAR, or 3.4 with an association. On the official DAO, voter A's setup, one proposal and its vote cost 2.72–2.73 HBAR ([PROOFS.md](../PROOFS.md#voting-power)). The relay also wants each transaction's `gasLimit × eth_gasPrice` on hand when it is sent; for a proposal that is about 2.1 HBAR. **About 10 HBAR covers every step** with room to spare.
 
 ## What a proposal costs the DAO
 
