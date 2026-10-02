@@ -31,6 +31,14 @@ import { type Address, type Hex, encodeAbiParameters, encodeErrorResult, getAddr
  * actions a user takes, then move the clock.
  */
 
+/** Gas price the simulator bills at (tinybar per gas). */
+const GAS_PRICE = 86n;
+/** Gas each callback used on testnet for a one-call proposal (docs/costs.md). The float pays this, not the limit. */
+const CALLBACK_GAS_USED: Record<AutoAction, bigint> = {
+  [AutoAction.Queue]: 1_610_000n,
+  [AutoAction.Execute]: 470_000n,
+};
+
 type Holder = {
   hbar: bigint;
   associated: boolean;
@@ -244,8 +252,8 @@ export class FixtureWorld implements DaoSource {
       return;
     }
     s.result = "SUCCESS";
-    // Hedera charges at least 80% of the gas limit.
-    this.floatHbar -= (this.rules.autoGas[action] * 8n * 86n) / 10n;
+    // Hedera bills the gas used; the limit only has to be in the float when the call fires.
+    this.floatHbar -= CALLBACK_GAS_USED[action] * GAS_PRICE;
     const state = this.stateOf(p);
     const expected = action === AutoAction.Queue ? ProposalState.Succeeded : ProposalState.Queued;
     if (state !== expected) {
@@ -343,7 +351,7 @@ export class FixtureWorld implements DaoSource {
       treasuryGov: this.treasuryGov,
       floatHbar: this.floatHbar,
       voteSupply: this.supplyAt(this.clock),
-      gasPrice: 86n,
+      gasPrice: GAS_PRICE,
       remoteAccount: { address: this.addresses.remoteAccount, ...this.remoteAccount },
     };
   }
@@ -402,7 +410,7 @@ export class FixtureWorld implements DaoSource {
 
   async estimate(tx: DaoTx): Promise<{ gas: bigint; cost: bigint }> {
     const gas = GAS_FLOOR[tx.kind];
-    return { gas, cost: gas * 86n };
+    return { gas, cost: gas * GAS_PRICE };
   }
 
   // -------------------------------------------------------------------------------------------

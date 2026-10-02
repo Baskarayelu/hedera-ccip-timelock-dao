@@ -40,14 +40,14 @@ To use npm's `create` command instead, write `create scaffold-hbar@latest my-dao
 
 ### Take part with a testnet wallet
 
-1. **Get a testnet account.** Create an ECDSA account at [portal.hedera.com](https://portal.hedera.com) and fund it from the [faucet](https://portal.hedera.com/faucet). About 10 HBAR covers every step below. Add Hedera testnet to your wallet (chain id 296, RPC `https://testnet.hashio.io/api`) and import the account's key, or use the app's burner wallet for a quick look.
+1. **Get a testnet account.** Create an ECDSA account at [portal.hedera.com](https://portal.hedera.com) and fund it from the [faucet](https://portal.hedera.com/faucet). About 10 HBAR covers every step below; they spend about 3 ([Costs](docs/costs.md)). Add Hedera testnet to your wallet (chain id 296, RPC `https://testnet.hashio.io/api`) and import the account's key, or use the app's burner wallet for a quick look.
 2. **Voting power** page: associate HGOV with your account (the page says when your account does not need to), claim 1,000 HGOV from the faucet, wrap them into vHGOV, and delegate to yourself.
 3. **New proposal**: add a Base action such as *Set a parameter*. The page quotes the CCIP fee live and proposes a cap of twice the quote. Submit.
 4. **Vote** on the proposal's page once voting opens (1 minute later in the demo settings), then watch it: the network queues it 5 seconds after voting ends, executes it after the 2-minute timelock, and the timeline links each step to HashScan, the CCIP explorer and Basescan. The receipt reaches Hedera after Base Sepolia finalizes the block, which the page estimates live.
 
 ### Deploy your own DAO
 
-The deploy uses the executor already on Base Sepolia, so you need only testnet HBAR, about 100 HBAR (one faucet day; most of it funds the treasury and the callback float).
+The deploy uses the executor already on Base Sepolia, so you need only testnet HBAR: about 60 HBAR, of which 22 pays for the contracts and the token and the rest funds the callback float (15) and the treasury (20). See [Costs](docs/costs.md).
 
 ```bash
 npm run foundry:account:generate   # writes a fresh key to packages/foundry/.env
@@ -111,6 +111,7 @@ Run these from the repository root.
 - [Threat model](docs/threat-model.md): assets, trust, attacks and mitigations
 - [Frontend](docs/frontend.md): pages, states, live data and tests
 - [Hedera, CCIP and CLI gotchas](docs/gotchas.md): behaviour measured on testnet that shaped the design
+- [Costs](docs/costs.md): how Hedera bills gas, and what each step, proposal and deployment costs, measured
 - [AGENTS.md](AGENTS.md): briefing for coding agents working in a scaffolded project
 
 ## Licence

@@ -8,6 +8,7 @@ import { NotDeployed } from "../NotDeployed";
 import { useFeeQuote, useNetworkStats, useOverview, useVoter } from "../hooks";
 import { Banner, CloseIcon, Parts } from "../ui";
 import { useQuery } from "@tanstack/react-query";
+import { GOV_SYMBOL, VOTE_SYMBOL } from "~~/lib/dao/config";
 import { deliveryEstimate, finalityText, receiptEta } from "~~/lib/dao/derive";
 import {
   DRAFT_LABELS,
@@ -24,6 +25,8 @@ import {
 import { formatDuration, formatOffset } from "~~/lib/dao/time";
 import type { DaoOverview } from "~~/lib/dao/types";
 import {
+  ETH_DECIMALS,
+  GOV_DECIMALS,
   HBAR_DECIMALS,
   USDC_DECIMALS,
   ceilToCentiHbar,
@@ -124,14 +127,14 @@ function ActionEditor({
             error={errors.to}
           />
           <Field
-            label="Amount (HGOV)"
+            label={`Amount (${GOV_SYMBOL})`}
             value={action.amount}
             onChange={amount => set({ amount })}
             error={errors.amount}
           />
         </div>
       );
-      note = `From the treasury${overview ? `, which holds ${formatGov(overview.treasuryGov)} HGOV` : ""}. The recipient must be associated with HGOV or have a free association slot.`;
+      note = `From the treasury${overview ? `, which holds ${formatGov(overview.treasuryGov)} ${GOV_SYMBOL}` : ""}. The recipient must be associated with ${GOV_SYMBOL} or have a free association slot.`;
       break;
     case "hederaCall":
     case "baseCall":
@@ -219,8 +222,35 @@ function ActionEditor({
       </div>
       {fields}
       <span className="hint">{note}</span>
+      {overview && shortfall(action, overview) && (
+        <span className="hint low" data-testid="draft-shortfall">
+          {base
+            ? "That is less than this action sends. Fund the account before the proposal executes, or the Base batch fails and the receipt says why."
+            : "That is less than this action sends. Top up the treasury before the proposal executes, or its execution fails until someone does."}
+        </span>
+      )}
     </div>
   );
+}
+
+/** True when a transfer asks for more than its source holds right now. */
+function shortfall(action: DraftAction, overview: DaoOverview): boolean {
+  const over = (amount: string, decimals: number, held: bigint) => {
+    const wanted = parseAmount(amount, decimals);
+    return wanted !== null && wanted > held;
+  };
+  switch (action.kind) {
+    case "hbar":
+      return over(action.amount, HBAR_DECIMALS, overview.treasuryHbar);
+    case "hgov":
+      return over(action.amount, GOV_DECIMALS, overview.treasuryGov);
+    case "baseToken":
+      return action.token === "USDC"
+        ? over(action.amount, USDC_DECIMALS, overview.remoteAccount.usdc)
+        : over(action.amount, ETH_DECIMALS, overview.remoteAccount.eth);
+    default:
+      return false;
+  }
 }
 
 export function NewProposalPage() {
@@ -510,7 +540,7 @@ export function NewProposalPage() {
             <div className="rule-top">
               <div className="kv">
                 <span className="muted">Your voting power</span>
-                <span className="mono">{voter.data ? `${formatVotes(voter.data.votes)} vHGOV` : "—"}</span>
+                <span className="mono">{voter.data ? `${formatVotes(voter.data.votes)} ${VOTE_SYMBOL}` : "—"}</span>
               </div>
               <div className="kv">
                 <span className="muted">You pay to propose</span>

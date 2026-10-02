@@ -7,6 +7,7 @@ import {
   remoteParametersAbi,
   voteTokenAbi,
 } from "./abis";
+import { GOV_SYMBOL } from "./config";
 import { ProposalState } from "./types";
 import { USDC_DECIMALS, formatHbar, formatUnitsFixed, shortAddress } from "./units";
 import { type Abi, type Hex, decodeErrorResult } from "viem";
@@ -65,7 +66,7 @@ function describe(name: string, args: readonly unknown[]): string {
     case "ClaimTooSoon":
       return "this account claimed within the cooldown";
     case "NotAssociated":
-      return "the account is not associated with HGOV";
+      return `the account is not associated with ${GOV_SYMBOL}`;
     case "HtsFailed":
       return `the token service returned ${hederaCodeName(Number(args[0]))}`;
     case "GovernorAlreadyCastVote":
@@ -103,7 +104,10 @@ export function decodeRevert(data: Hex | undefined): DecodedRevert {
 /** The raw form shown next to the sentence, e.g. "FeeAboveCap(231000000, 200000000)". */
 export function revertSignature(decoded: DecodedRevert): string {
   if (!decoded.name) return "";
-  return `${decoded.name}(${decoded.args.map(a => (typeof a === "bigint" ? a.toString() : String(a))).join(", ")})`;
+  // Nested revert data is already explained in the text; keep only its selector here.
+  const arg = (a: unknown) =>
+    typeof a === "bigint" ? a.toString() : typeof a === "string" && a.length > 42 ? `${a.slice(0, 10)}…` : String(a);
+  return `${decoded.name}(${decoded.args.map(arg).join(", ")})`;
 }
 
 /** Best-effort message from a wallet or RPC error for a toast. */

@@ -10,6 +10,8 @@ export type HederaDeployment = {
   deployedAt: number;
   deployer: Address;
   governanceToken: Address;
+  /** The HTS token's symbol, set at deploy time (GOV_TOKEN_SYMBOL); the vote token is "v" + this. */
+  governanceSymbol: string;
   governor: Address;
   timelock: Address;
   voteToken: Address;
@@ -45,6 +47,10 @@ export const BASE_RPC_URL = process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL || "htt
 
 /** Fixture mode serves scripted scenarios instead of chain reads. Used by the e2e tests only. */
 export const FIXTURES_ENABLED = process.env.NEXT_PUBLIC_DAO_FIXTURES === "true";
+
+/** Token symbols shown in the app. Fixtures always use the default, so their screenshots do not depend on a deploy. */
+export const GOV_SYMBOL = (!FIXTURES_ENABLED && deployment.hedera?.governanceSymbol) || "HGOV";
+export const VOTE_SYMBOL = `v${GOV_SYMBOL}`;
 
 export const explorer = {
   hederaTx: (hash: Hex | string) => `https://hashscan.io/testnet/transaction/${hash}`,

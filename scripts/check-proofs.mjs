@@ -9,7 +9,8 @@
  * - sepolia.basescan.org/address/0x…     code exists at that address on Base Sepolia
  *
  * Links that document a failure on purpose list their expected outcome in docs/proofs.json, either as the result
- * string or as { "result": …, "gasUsed": … } when the docs quote the gas a transaction used.
+ * string or as { "result": …, "gasUsed": … } when the docs quote the gas a transaction used. A schedule can also
+ * state { "gasLimit": …, "charged": … } (tinybar), which is how docs/costs.md proves what a scheduled call is billed.
  *
  *   node scripts/check-proofs.mjs
  */
@@ -78,18 +79,32 @@ const checks = {
     return null;
   },
   async "hedera-schedule"(id, expected = "SUCCESS") {
+    const want =
+      typeof expected === "string"
+        ? { result: expected }
+        : { result: "SUCCESS", ...expected };
     const s = await getJson(`${MIRROR}/api/v1/schedules/${id}`);
     if (!s.schedule_id) return `not found (HTTP ${s._status})`;
     if (!s.executed_timestamp) return "has not executed";
     const t = await getJson(
       `${MIRROR}/api/v1/transactions?timestamp=${s.executed_timestamp}`,
     );
-    const result =
-      t.transactions?.find((x) => x.scheduled)?.result ??
-      t.transactions?.[0]?.result;
-    return result === expected
-      ? null
-      : `ran with ${result}, expected ${expected}`;
+    const ran = t.transactions?.find((x) => x.scheduled) ?? t.transactions?.[0];
+    if (ran?.result !== want.result)
+      return `ran with ${ran?.result}, expected ${want.result}`;
+    if (want.charged !== undefined && ran.charged_tx_fee !== want.charged)
+      return `charged ${ran.charged_tx_fee} tinybar, docs say ${want.charged}`;
+    if (want.gasUsed !== undefined || want.gasLimit !== undefined) {
+      // A scheduled contract call's result is filed under the transaction id that created the schedule.
+      const r = await getJson(
+        `${MIRROR}/api/v1/contracts/results/${ran.transaction_id}?nonce=${ran.nonce}`,
+      );
+      if (want.gasUsed !== undefined && r.gas_used !== want.gasUsed)
+        return `used ${r.gas_used} gas, docs say ${want.gasUsed}`;
+      if (want.gasLimit !== undefined && r.gas_limit !== want.gasLimit)
+        return `gas limit ${r.gas_limit}, docs say ${want.gasLimit}`;
+    }
+    return null;
   },
   async "hedera-contract"(address) {
     const c = await getJson(`${MIRROR}/api/v1/contracts/${address}`);

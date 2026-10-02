@@ -6,16 +6,19 @@ import { useDao } from "../DaoProvider";
 import { NotDeployed } from "../NotDeployed";
 import { useOverview, useProposalViews } from "../hooks";
 import { Chip, ClockIcon, LoadState, PlusIcon } from "../ui";
-import { explorer } from "~~/lib/dao/config";
+import { GOV_SYMBOL, explorer } from "~~/lib/dao/config";
 import type { Chip as ChipName, ProposalView } from "~~/lib/dao/derive";
 import { formatDuration } from "~~/lib/dao/time";
-import type { DaoOverview, ProposalRecord } from "~~/lib/dao/types";
+import { AutoAction, type DaoOverview, type ProposalRecord } from "~~/lib/dao/types";
 import { ETH_DECIMALS, USDC_DECIMALS, formatAmount, formatHbar, formatVotes, shortAddress } from "~~/lib/dao/units";
 
 const CHIP_ORDER: ChipName[] = ["Active", "Pending", "Passed", "Queued", "Executed", "Defeated", "Canceled"];
 
 function Stats({ overview }: { overview: DaoOverview }) {
   const { rules, remoteAccount } = overview;
+  // A callback fails unless the float holds its whole gas limit at today's price, though only the gas used is billed.
+  const { [AutoAction.Queue]: queueGas, [AutoAction.Execute]: executeGas } = rules.autoGas;
+  const floatNeed = (queueGas > executeGas ? queueGas : executeGas) * overview.gasPrice;
   const share =
     rules.quorumDenominator === 100n
       ? `${rules.quorumNumerator}%`
@@ -26,13 +29,19 @@ function Stats({ overview }: { overview: DaoOverview }) {
         <span className="kpi-label">Treasury</span>
         <span className="kpi-value">{formatHbar(overview.treasuryHbar)}</span>
         <span className="kpi-note">
-          Held by the timelock{overview.treasuryGov > 0n ? ` · ${formatVotes(overview.treasuryGov)} HGOV` : ""}
+          Held by the timelock{overview.treasuryGov > 0n ? ` · ${formatVotes(overview.treasuryGov)} ${GOV_SYMBOL}` : ""}
         </span>
       </div>
       <div className="panel kpi">
         <span className="kpi-label">Callback float</span>
         <span className="kpi-value">{formatHbar(overview.floatHbar)}</span>
-        <span className="kpi-note">Pays the network to queue and execute</span>
+        {overview.floatHbar < floatNeed ? (
+          <span className="kpi-note low" data-testid="float-low">
+            Too low: a callback needs {formatHbar(floatNeed)} available. Send HBAR to the governor.
+          </span>
+        ) : (
+          <span className="kpi-note">Pays the network to queue and execute</span>
+        )}
       </div>
       <div className="panel kpi">
         <span className="kpi-label">DAO account on Base Sepolia</span>

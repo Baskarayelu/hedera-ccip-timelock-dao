@@ -58,11 +58,11 @@ const base = createPublicClient({
   batch: { multicall: true },
 });
 
-/** Short-lived memo so the list, the detail page and the stats share one log scan. */
+/** Short-lived memo so the list, the detail page and the stats share one log scan. `reset` drops it. */
 function memo<T>(ttlMs: number, load: () => Promise<T>) {
   let at = 0;
   let value: Promise<T> | null = null;
-  return () => {
+  const get = () => {
     if (!value || Date.now() - at > ttlMs) {
       at = Date.now();
       value = load().catch(error => {
@@ -72,6 +72,7 @@ function memo<T>(ttlMs: number, load: () => Promise<T>) {
     }
     return value;
   };
+  return Object.assign(get, { reset: () => (value = null) });
 }
 
 type Decoded = { name: string; args: Record<string, unknown>; tx: TxRef };
@@ -117,6 +118,22 @@ async function remoteOutcome(txHash: Hex, timestamp: number, executor: Address):
     account: processed.args.account,
     tx: { hash: txHash, timestamp },
   };
+}
+
+/**
+ * Revert data from a failed estimate, when the error carries any. viem puts it in `raw` on its
+ * ContractFunctionRevertedError (also when the error is not in the ABI it was given, such as a timelock
+ * error bubbling up through the governor), and in `data` on the RPC error underneath.
+ */
+export function revertDataOf(error: unknown): Hex | undefined {
+  let e = error as { data?: unknown; raw?: unknown; cause?: unknown } | undefined;
+  for (let depth = 0; e && depth < 6; depth++) {
+    if (typeof e.raw === "string" && e.raw.startsWith("0x")) return e.raw as Hex;
+    if (typeof e.data === "string" && e.data.startsWith("0x")) return e.data as Hex;
+    if (e.data && typeof (e.data as { data?: unknown }).data === "string") return (e.data as { data: Hex }).data;
+    e = e.cause as typeof e;
+  }
+  return undefined;
 }
 
 export function createLiveSource(dep: HederaDeployment | null, getWallet: () => WalletClient | undefined): DaoSource {
@@ -268,14 +285,19 @@ export function createLiveSource(dep: HederaDeployment | null, getWallet: () => 
     }
   }
 
+  /** Deliveries that finished: what CCIP and the executor reported never changes after that. */
+  const settled = new Map<Hex, Pick<CrossChainRecord, "delivery" | "remote">>();
+
   async function enrichMessage(message: CrossChainRecord) {
-    if (message.receipt) return;
+    const known = settled.get(message.messageId);
+    if (known) return Object.assign(message, known);
     const status = await ccipStatus(message.messageId);
     if (!status) return;
     const timestamp = parseCcipTime(status.receiptTimestamp);
     message.delivery = { state: status.state, tx: (status.receiptTransactionHash as Hex) ?? undefined, timestamp };
     if (status.state !== "pending" && status.receiptTransactionHash && timestamp) {
       message.remote = await remoteOutcome(status.receiptTransactionHash as Hex, timestamp, message.executor);
+      settled.set(message.messageId, { delivery: message.delivery, remote: message.remote });
     }
   }
 
@@ -500,26 +522,14 @@ export function createLiveSource(dep: HederaDeployment | null, getWallet: () => 
     });
   }
 
-  /** Revert data from a failed estimate, when the error carries any. */
-  const revertDataOf = (error: unknown): Hex | undefined => {
-    let e = error as { data?: unknown; cause?: unknown } | undefined;
-    for (let depth = 0; e && depth < 6; depth++) {
-      if (typeof e.data === "string" && e.data.startsWith("0x")) return e.data as Hex;
-      if (e.data && typeof (e.data as { data?: unknown }).data === "string") return (e.data as { data: Hex }).data;
-      e = e.cause as typeof e;
-    }
-    return undefined;
-  };
-
   async function plannedGas(tx: DaoTx, from: Address) {
     const plan = planTx(tx, from, need().addresses);
     const price = await gasPrice();
     try {
       const estimated = await hedera.estimateContractGas({ ...plan, account: from } as any);
       const gas = (estimated * 125n) / 100n > plan.floor ? (estimated * 125n) / 100n : plan.floor;
-      // Hedera charges the larger of the gas used and 80% of the limit.
-      const charged = estimated > (gas * 8n) / 10n ? estimated : (gas * 8n) / 10n;
-      return { gas, cost: charged * price, revert: undefined };
+      // Hedera bills the gas used, not the limit; the limit only has to be covered by the balance.
+      return { gas, cost: estimated * price, revert: undefined };
     } catch (error) {
       return { gas: plan.floor, cost: plan.floor * price, revert: revertDataOf(error) };
     }
@@ -552,6 +562,11 @@ export function createLiveSource(dep: HederaDeployment | null, getWallet: () => 
       gasPrice: await hedera.getGasPrice(),
     } as any);
     const receipt = await hedera.waitForTransactionReceipt({ hash, timeout: 120_000 });
+    // The pages read events from the mirror node, which indexes a transaction a few seconds after consensus:
+    // wait for it, then drop the cached scans so the refetch that follows shows the new state.
+    await mirror.waitForResult(hash);
+    governorEvents.reset();
+    timelockEvents.reset();
     let proposalId: bigint | undefined;
     if (tx.kind === "propose") {
       const [created] = parseEventLogs({ abi: daoGovernorAbi, eventName: "ProposalCreated", logs: receipt.logs });

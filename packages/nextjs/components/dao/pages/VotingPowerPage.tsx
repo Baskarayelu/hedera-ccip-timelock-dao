@@ -6,6 +6,7 @@ import { NotDeployed } from "../NotDeployed";
 import { useNow, useVoter } from "../hooks";
 import { Banner, LoadState } from "../ui";
 import { type Address, isAddress } from "viem";
+import { GOV_SYMBOL, VOTE_SYMBOL } from "~~/lib/dao/config";
 import { formatDuration, formatWhen } from "~~/lib/dao/time";
 import type { VoterStatus } from "~~/lib/dao/types";
 import { GOV_DECIMALS, formatGov, formatHbar, formatUnitsFixed, parseAmount, shortAddress } from "~~/lib/dao/units";
@@ -103,7 +104,7 @@ function Steps({ voter }: { voter: VoterStatus }) {
     wrapAmount === null || wrapAmount === 0n
       ? "Enter an amount above zero with at most 6 decimals."
       : wrapAmount > voter.gov
-        ? `You hold ${formatGov(voter.gov)} HGOV.`
+        ? `You hold ${formatGov(voter.gov)} ${GOV_SYMBOL}.`
         : undefined;
   const otherValid = isAddress(delegateTo.trim());
   const delegateTarget = delegateMode === "self" ? wallet.address : (delegateTo.trim() as Address);
@@ -126,10 +127,10 @@ function Steps({ voter }: { voter: VoterStatus }) {
   const wrap = async () => {
     if (!wrapAmount) return;
     if (voter.allowance < wrapAmount) {
-      const approved = await run({ kind: "approve", amount: wrapAmount }, "Approve HGOV");
+      const approved = await run({ kind: "approve", amount: wrapAmount }, `Approve ${GOV_SYMBOL}`);
       if (!approved) return;
     }
-    await run({ kind: "wrap", amount: wrapAmount }, "Wrap HGOV");
+    await run({ kind: "wrap", amount: wrapAmount }, `Wrap ${GOV_SYMBOL}`);
   };
   const delegate = async () => {
     if (!delegateTarget) return;
@@ -146,7 +147,7 @@ function Steps({ voter }: { voter: VoterStatus }) {
         <Step
           n={1}
           state={shown[0]}
-          title="Associate HGOV with your account"
+          title={`Associate ${GOV_SYMBOL} with your account`}
           body="Hedera accounts opt in to each token (HIP-719). One transaction."
           note={
             associateState === "optional"
@@ -162,10 +163,10 @@ function Steps({ voter }: { voter: VoterStatus }) {
             <div className="setup-step-action">
               <ActionButton
                 label="Associate"
-                pendingLabel="Associate HGOV"
+                pendingLabel={`Associate ${GOV_SYMBOL}`}
                 primary
                 disabled={blocked}
-                onClick={() => run({ kind: "associate" }, "Associate HGOV")}
+                onClick={() => run({ kind: "associate" }, `Associate ${GOV_SYMBOL}`)}
               />
             </div>
           )}
@@ -173,7 +174,7 @@ function Steps({ voter }: { voter: VoterStatus }) {
         <Step
           n={2}
           state={shown[1]}
-          title={`Claim ${formatGov(voter.claimAmount, 0)} HGOV`}
+          title={`Claim ${formatGov(voter.claimAmount, 0)} ${GOV_SYMBOL}`}
           body={`Testnet faucet: one claim per account every ${formatDuration(voter.claimCooldown)}.`}
           note={
             coolingDown
@@ -184,18 +185,18 @@ function Steps({ voter }: { voter: VoterStatus }) {
           <div className="setup-step-action">
             <ActionButton
               label="Claim"
-              pendingLabel="Claim HGOV"
+              pendingLabel={`Claim ${GOV_SYMBOL}`}
               primary={shown[1] === "current"}
               disabled={blocked || coolingDown || !canReceive}
-              onClick={() => run({ kind: "claim" }, "Claim HGOV")}
+              onClick={() => run({ kind: "claim" }, `Claim ${GOV_SYMBOL}`)}
             />
           </div>
         </Step>
         <Step
           n={3}
           state={shown[2]}
-          title="Wrap HGOV into vHGOV"
-          body="vHGOV is what the governor counts. It is 1:1, and you can unwrap any time."
+          title={`Wrap ${GOV_SYMBOL} into ${VOTE_SYMBOL}`}
+          body={`${VOTE_SYMBOL} is what the governor counts. It is 1:1, and you can unwrap any time.`}
         >
           {wrapState === "done" ? (
             <span className="done-pill">Done</span>
@@ -212,15 +213,17 @@ function Steps({ voter }: { voter: VoterStatus }) {
                     disabled={voter.gov === 0n}
                     aria-describedby="wrap-hint"
                   />
-                  <span className="small faint">HGOV</span>
+                  <span className="small faint">{GOV_SYMBOL}</span>
                 </span>
                 <span id="wrap-hint" className={voter.gov > 0n && wrapError ? "field-error" : "hint"}>
-                  {voter.gov > 0n && wrapError ? wrapError : `You hold ${formatGov(voter.gov)} HGOV.`}
+                  {voter.gov > 0n && wrapError ? wrapError : `You hold ${formatGov(voter.gov)} ${GOV_SYMBOL}.`}
                 </span>
               </label>
               <ActionButton
                 label={wrapAmount && voter.allowance >= wrapAmount ? "Wrap" : "Approve and wrap"}
-                pendingLabel={wrapAmount && voter.allowance >= wrapAmount ? "Wrap HGOV" : "Approve HGOV"}
+                pendingLabel={
+                  wrapAmount && voter.allowance >= wrapAmount ? `Wrap ${GOV_SYMBOL}` : `Approve ${GOV_SYMBOL}`
+                }
                 primary={shown[2] === "current"}
                 disabled={blocked || voter.gov === 0n || !!wrapError}
                 onClick={wrap}
@@ -312,11 +315,11 @@ function Balances({ voter }: { voter: VoterStatus }) {
       <h2 id="bal-title">Your balances</h2>
       <dl className="balances">
         <dt>
-          HGOV <span className="small faint">HTS token</span>
+          {GOV_SYMBOL} <span className="small faint">HTS token</span>
         </dt>
         <dd data-testid="bal-hgov">{canReceive ? formatGov(voter.gov) : "—"}</dd>
         <dt>
-          vHGOV <span className="small faint">wrapped</span>
+          {VOTE_SYMBOL} <span className="small faint">wrapped</span>
         </dt>
         <dd data-testid="bal-vhgov">{formatGov(voter.voteBalance)}</dd>
         <dt>Voting power now</dt>
@@ -346,24 +349,24 @@ function Balances({ voter }: { voter: VoterStatus }) {
                   onChange={e => setAmount(e.target.value)}
                   aria-invalid={amount !== "" && invalid}
                 />
-                <span className="small faint">vHGOV</span>
+                <span className="small faint">{VOTE_SYMBOL}</span>
               </span>
-              <span className="hint">Unwrapped HGOV stops counting as votes immediately.</span>
+              <span className="hint">Unwrapped {GOV_SYMBOL} stops counting as votes immediately.</span>
             </label>
             <button
               type="button"
               className="dbtn"
-              disabled={invalid || wallet.wrongNetwork || pending.has("Unwrap vHGOV")}
+              disabled={invalid || wallet.wrongNetwork || pending.has(`Unwrap ${VOTE_SYMBOL}`)}
               onClick={async () => {
-                if (value && (await run({ kind: "unwrap", amount: value }, "Unwrap vHGOV"))) setOpen(false);
+                if (value && (await run({ kind: "unwrap", amount: value }, `Unwrap ${VOTE_SYMBOL}`))) setOpen(false);
               }}
             >
-              {pending.has("Unwrap vHGOV") ? "Sending…" : "Unwrap"}
+              {pending.has(`Unwrap ${VOTE_SYMBOL}`) ? "Sending…" : "Unwrap"}
             </button>
           </div>
         ) : (
           <button type="button" className="dbtn" style={{ alignSelf: "flex-start" }} onClick={() => setOpen(true)}>
-            Unwrap vHGOV
+            Unwrap {VOTE_SYMBOL}
           </button>
         ))}
     </section>
@@ -386,13 +389,13 @@ export function VotingPowerPage() {
   } else if (v && !canReceive) {
     alert = {
       tone: "warn",
-      title: "Your account is not associated with HGOV yet",
+      title: `Your account is not associated with ${GOV_SYMBOL} yet`,
       body: "Hedera rejects token transfers to accounts that have not opted in, and yours has no free automatic-association slots. Associate first; the faucet and unwrapping need it.",
     };
   } else if (v && v.voteBalance > 0n && !v.delegate) {
     alert = {
       tone: "warn",
-      title: `Your ${formatGov(v.voteBalance, 0)} vHGOV carry no votes yet`,
+      title: `Your ${formatGov(v.voteBalance, 0)} ${VOTE_SYMBOL} carry no votes yet`,
       body: "Wrapped tokens only count once they are delegated. Delegate before the next proposal’s snapshot; proposals already open use the snapshot taken when they started.",
     };
   }
@@ -437,9 +440,9 @@ export function VotingPowerPage() {
               <section aria-labelledby="why-title" className="panel-soft">
                 <h2 id="why-title">Why wrap?</h2>
                 <p className="small muted" style={{ margin: 0, fontSize: 14 }}>
-                  HGOV transfers are native Hedera transactions and run no contract code, so the token cannot record
-                  vote checkpoints itself. vHGOV records them, and the governor reads your balance at each proposal’s
-                  snapshot. Tokens moved or wrapped after a vote starts cannot be counted twice.
+                  {GOV_SYMBOL} transfers are native Hedera transactions and run no contract code, so the token cannot
+                  record vote checkpoints itself. {VOTE_SYMBOL} records them, and the governor reads your balance at
+                  each proposal’s snapshot. Tokens moved or wrapped after a vote starts cannot be counted twice.
                 </p>
               </section>
             </aside>

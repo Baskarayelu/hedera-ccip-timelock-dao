@@ -139,6 +139,7 @@ function Actions({ record, view, overview }: { record: ProposalRecord; view: Pro
 function Fallback({ record, view }: { record: ProposalRecord; view: ProposalView }) {
   const { run, wallet, pending } = useDao();
   const f = view.fallback;
+  if (!f) return null;
   const primaryLabel = f.primary.kind === "queue" ? "Queue proposal" : "Execute proposal";
   const rearmLabel = `Schedule ${f.rearm.action === AutoAction.Queue ? "queue" : "execution"} again`;
   return (

@@ -1,5 +1,5 @@
 import { daoGovernorAbi, daoTimelockAbi, remoteParametersAbi, requestParameters } from "./abis";
-import { BASE_SELECTOR } from "./config";
+import { BASE_SELECTOR, GOV_SYMBOL } from "./config";
 import type { BuiltProposal, ProposalRecord, RemoteCall } from "./types";
 import {
   ETH_DECIMALS,
@@ -65,7 +65,7 @@ export const isBaseDraft = (action: DraftAction) => BASE_KINDS.has(action.kind);
 
 export const DRAFT_LABELS: Record<DraftKind, string> = {
   hbar: "Send HBAR from the treasury",
-  hgov: "Send HGOV from the treasury",
+  hgov: `Send ${GOV_SYMBOL} from the treasury`,
   hederaCall: "Call a Hedera contract",
   param: "Set a parameter",
   baseToken: "Send tokens from the DAO’s account",
@@ -366,7 +366,7 @@ function describeHederaCall(call: RemoteCall, addresses: DaoAddresses): ActionVi
         return {
           chain: "hedera",
           parts: [
-            { text: `Send ${formatAmount(amount, GOV_DECIMALS, 2)} HGOV to ` },
+            { text: `Send ${formatAmount(amount, GOV_DECIMALS, 2)} ${GOV_SYMBOL} to ` },
             { text: shortAddress(to), mono: true },
           ],
           detail: "From the treasury (the timelock)",

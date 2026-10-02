@@ -52,7 +52,7 @@ The Voting power page has its own states: HGOV not associated (and no free autom
 | CCIP fee | The Hedera router's `getFee` for the exact message the timelock will send |
 | Receipt estimate | Base Sepolia's finalized head versus its latest block, plus the median time CCIP took after finality on this DAO's recent receipts |
 | Delivery estimate | Median of this DAO's recent Hedera → Base deliveries |
-| Cost of proposing | The relay's gas estimate and `eth_gasPrice`, with Hedera's 80%-of-limit minimum charge |
+| Cost of proposing | The relay's gas estimate times `eth_gasPrice` (Hedera bills the gas used, not the limit) |
 | Association | Mirror node: the account's token relationships and automatic-association slots |
 
 When there is nothing to measure yet (a new DAO has no receipts), the page says so instead of showing a guess.

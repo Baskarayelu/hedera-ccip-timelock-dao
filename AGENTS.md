@@ -22,7 +22,7 @@ The project is a DAO on Hedera:
 | `packages/nextjs/components/dao/` | The app's pages (`pages/`), shell, provider and hooks |
 | `packages/nextjs/lib/dao/` | Data layer: `DaoSource`, live and fixture sources, `derive.ts`, encoding, units |
 | `packages/nextjs/e2e/` | Playwright: `unit/` (no browser) and `flows/` (pages in fixture mode) |
-| `docs/` | Architecture, threat model, wrap-to-vote, frontend, gotchas |
+| `docs/` | Architecture, threat model, wrap-to-vote, frontend, gotchas, costs |
 
 ## Commands
 
@@ -50,10 +50,10 @@ Keys come from `.env.local` at the repository root, then `packages/foundry/.env`
 - **`block.timestamp` trails consensus time.** It is the start of the ~2 s record-file block, so a scheduled call due at second S can read S - 3. Schedule a callback that needs `block.timestamp >= T` at `T + BLOCK_CLOCK_MARGIN` (4 s).
 - **One `scheduleCall` per transaction.** A second one returns response code 373. A busy second returns 370 and still costs ~1.4M gas, so probe `hasScheduleCapacity` inside the transaction first; the relay's `eth_call` ignores throttles. `HssScheduler._scheduleSelfCall` does all of this; reuse it.
 - **Never send `msg.value` to 0x16b.** The call fails and burns all its gas.
-- **A scheduled call runs once.** If the payer cannot cover `gasLimit × gas price` when it fires, the schedule is consumed with no event and no retry. Keep the governor's float funded, and keep `queue`, `execute` and `rearm` permissionless.
+- **A scheduled call runs once.** If the payer cannot cover `gasLimit × gas price` when it fires, the schedule is consumed with no event and no retry, and a small fixed fee is still charged. Only the gas used is billed when it runs. Keep the governor's float funded, and keep `queue`, `execute` and `rearm` permissionless.
 - **Auto-execution goes through `Governor.execute`**, not the timelock directly. OpenZeppelin's `onlyGovernance` checks only pass on that path.
 - **HTS association.** Accounts and contracts must be associated with an HTS token before receiving it. Contracts associate through the token's HIP-719 `associate()`, then confirm with `isAssociated()`.
-- **The relay reserves `gasLimit × price` up front.** Send Hedera transactions as legacy transactions with explicit gas limits; estimates undercount system-contract work.
+- **The relay reserves `gasLimit × price` up front, but Hedera bills only the gas used** (measured in `docs/costs.md`). Send Hedera transactions as legacy transactions with explicit gas limits; a generous limit costs balance, not HBAR, and estimates can undercount system-contract work.
 - **CCIP receivers must answer ERC-165** for `IAny2EVMMessageReceiver` (`0x85572ffb`), or the OffRamp drops the data. Size destination gas generously: a receiver that also sends a receipt needed ~362k gas on Base Sepolia.
 
 ## Frontend rules

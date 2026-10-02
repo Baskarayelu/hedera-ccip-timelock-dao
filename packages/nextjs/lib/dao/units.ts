@@ -13,7 +13,7 @@ export const WEIBAR_PER_TINYBAR = 10_000_000_000n;
 export const weibarToTinybar = (weibar: bigint) => weibar / WEIBAR_PER_TINYBAR;
 export const tinybarToWeibar = (tinybar: bigint) => tinybar * WEIBAR_PER_TINYBAR;
 
-/** HGOV and vHGOV use 6 decimals (set by the faucet when it creates the token). */
+/** The governance token and its vote token use 6 decimals (set by the faucet when it creates the token). */
 export const GOV_DECIMALS = 6;
 export const USDC_DECIMALS = 6;
 export const ETH_DECIMALS = 18;

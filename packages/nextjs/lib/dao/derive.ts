@@ -1,4 +1,4 @@
-import { explorer } from "./config";
+import { VOTE_SYMBOL, explorer } from "./config";
 import { decodeRevert, hederaCodeName, revertSignature } from "./errors";
 import {
   type CrossChainBundle,
@@ -280,7 +280,8 @@ export type ProposalView = {
   listQuorum: string;
   votes: VotesView;
   timeline: TimelineStep[];
-  fallback: FallbackView;
+  /** Null once no network call is ahead (finished, defeated or cancelled). */
+  fallback: FallbackView | null;
   canCancel: boolean;
 };
 
@@ -291,7 +292,7 @@ function votesView(p: ProposalRecord, phase: Phase, ctx: DeriveContext): VotesVi
   const decided = p.votes.for + p.votes.against;
   const counted = quorumCounted(p);
   const supply = p.supplyAtSnapshot;
-  const quorumBase = `Quorum ${formatVotes(p.quorum)}${supply !== null ? ` of ${formatVotes(supply)}` : ""} vHGOV`;
+  const quorumBase = `Quorum ${formatVotes(p.quorum)}${supply !== null ? ` of ${formatVotes(supply)}` : ""} ${VOTE_SYMBOL}`;
   let quorumLine: string;
   if (p.state === ProposalState.Pending) quorumLine = `${quorumBase} (if the snapshot were now)`;
   else if (counted >= p.quorum) quorumLine = `${quorumBase} · reached`;
@@ -314,16 +315,19 @@ function votesView(p: ProposalRecord, phase: Phase, ctx: DeriveContext): VotesVi
   if (!viewer) you = { text: "Connect a wallet to see your voting power for this proposal.", tone: "neutral" };
   else if (viewer.vote) {
     you = {
-      text: `You voted ${supportName(viewer.vote.support)} with ${formatVotes(viewer.vote.weight)} vHGOV.`,
+      text: `You voted ${supportName(viewer.vote.support)} with ${formatVotes(viewer.vote.weight)} ${VOTE_SYMBOL}.`,
       tone: "accent",
     };
   } else if (phase === "pending") {
     you = {
-      text: `Your votes are read at the snapshot (${formatWhen(p.voteStart, now)}). You have ${formatVotes(viewer.votingPower)} vHGOV of voting power now.`,
+      text: `Your votes are read at the snapshot (${formatWhen(p.voteStart, now)}). You have ${formatVotes(viewer.votingPower)} ${VOTE_SYMBOL} of voting power now.`,
       tone: "neutral",
     };
   } else if (phase === "active" && viewer.votingPower > 0n) {
-    you = { text: `Your voting power at the snapshot: ${formatVotes(viewer.votingPower)} vHGOV.`, tone: "accent" };
+    you = {
+      text: `Your voting power at the snapshot: ${formatVotes(viewer.votingPower)} ${VOTE_SYMBOL}.`,
+      tone: "accent",
+    };
     canVote = true;
   } else if (phase === "active") {
     you = {
@@ -439,7 +443,10 @@ function timeline(
         : "The network queues it one moment after voting ends, if it passed.",
       status: "later",
       link: queued
-        ? (scheduleLink(AutoAction.Queue) ?? { label: "HashScan: queue tx ↗", href: explorer.hederaTx(queued.tx.hash) })
+        ? (queuedByNetwork && scheduleLink(AutoAction.Queue)) || {
+            label: "HashScan: queue tx ↗",
+            href: explorer.hederaTx(queued.tx.hash),
+          }
         : undefined,
     },
     {
@@ -455,10 +462,10 @@ function timeline(
           : "Runs the actions from the treasury.",
       status: "later",
       link: executed
-        ? (scheduleLink(AutoAction.Execute) ?? {
+        ? (executedByNetwork && scheduleLink(AutoAction.Execute)) || {
             label: "HashScan: execute tx ↗",
             href: explorer.hederaTx(executed.tx.hash),
-          })
+          }
         : undefined,
     },
   ];
@@ -572,12 +579,15 @@ function timeline(
   return steps;
 }
 
+/** Phases with a network callback still ahead, where the quiet "if it fails" panel is useful. */
+const CALLBACK_AHEAD = new Set<Phase>(["pending", "active", "queueing", "queued", "executing"]);
+
 function fallbackView(
   p: ProposalRecord,
   phase: Phase,
   outcome: CallbackOutcome | null,
   ctx: DeriveContext,
-): FallbackView {
+): FallbackView | null {
   const { now } = ctx;
   const quiet: FallbackView = {
     emphasis: "quiet",
@@ -614,7 +624,7 @@ function fallbackView(
       primary: { enabled: true, kind: "execute", label: "Execute now" },
     };
   }
-  return quiet;
+  return CALLBACK_AHEAD.has(phase) ? quiet : null;
 }
 
 export function deriveProposal(p: ProposalRecord, ctx: DeriveContext): ProposalView {
@@ -684,9 +694,9 @@ export function deriveProposal(p: ProposalRecord, ctx: DeriveContext): ProposalV
       banner = {
         tone: "neutral",
         title: "Defeated: quorum not reached",
-        body: `${formatVotes(quorumCounted(p))} vHGOV counted toward quorum; ${formatVotes(p.quorum)} were needed (${share} of the ${formatVotes(
+        body: `${formatVotes(quorumCounted(p))} ${VOTE_SYMBOL} counted toward quorum; ${formatVotes(p.quorum)} were needed (${share} of the ${formatVotes(
           p.supplyAtSnapshot ?? 0n,
-        )} vHGOV at the snapshot). ${skipped ? "The network did not queue it." : "It will not be queued."}`,
+        )} ${VOTE_SYMBOL} at the snapshot). ${skipped ? "The network did not queue it." : "It will not be queued."}`,
       };
       next = skipped ? "Quorum not reached. The network skipped queueing." : "Quorum not reached.";
       break;

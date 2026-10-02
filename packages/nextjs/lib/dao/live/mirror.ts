@@ -66,3 +66,12 @@ export async function tokenRelationships(accountId: string): Promise<MirrorToken
   const body = await get<Page<"tokens", MirrorTokenRelationship>>(`/api/v1/accounts/${accountId}/tokens?limit=100`);
   return body?.tokens ?? [];
 }
+
+/** Resolves once the mirror node has indexed a transaction (or after `timeoutMs`, so a slow mirror never blocks). */
+export async function waitForResult(hash: Hex, timeoutMs = 20_000): Promise<void> {
+  const until = Date.now() + timeoutMs;
+  while (Date.now() < until) {
+    if (await get(`/api/v1/contracts/results/${hash}`).catch(() => null)) return;
+    await new Promise(resolve => setTimeout(resolve, 1_500));
+  }
+}

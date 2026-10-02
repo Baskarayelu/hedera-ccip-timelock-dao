@@ -62,6 +62,7 @@ const deployment = {
     deployedAt: timestampOf(hederaDeployment.deployedAt),
     deployer: hederaDeployment.deployer,
     governanceToken: hederaDeployment.governanceToken,
+    governanceSymbol: hederaDeployment.settings.tokenSymbol,
     governor: hederaDeployment.contracts.DaoGovernor.address,
     timelock: hederaDeployment.contracts.DaoTimelock.address,
     voteToken: hederaDeployment.contracts.VoteToken.address,

@@ -31,14 +31,16 @@ export interface DaoSource {
 export type TxPlan = { address: Address; abi: Abi; functionName: string; args: readonly unknown[]; floor: bigint };
 
 /**
- * Gas floors per write. Hedera charges at least 80% of the gas limit, so limits stay close to what each
- * call needs; the relay's estimate (plus a margin) is used when it is higher. Floors matter for calls into
- * system contracts (HTS, the schedule service), where the relay's estimate can come out low.
+ * Gas floors per write: the limit is the relay's estimate plus 25%, or this floor when that is lower or the
+ * estimate fails. Hedera bills the gas a transaction used, not its limit, so a floor above the need costs
+ * nothing; the relay only requires the sender to hold `limit x gas price` when it submits. Each floor is
+ * about 1.25x the gas measured on testnet (docs/costs.md), so the calls into system contracts (HTS, the
+ * schedule service) still go through if the relay's estimate comes out low.
  */
 export const GAS_FLOOR: Record<DaoTx["kind"], bigint> = {
-  associate: 800_000n,
-  claim: 400_000n,
-  approve: 100_000n,
+  associate: 950_000n,
+  claim: 1_000_000n,
+  approve: 950_000n,
   wrap: 200_000n,
   unwrap: 200_000n,
   delegate: 150_000n,

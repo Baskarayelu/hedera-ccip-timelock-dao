@@ -1,6 +1,10 @@
 import { expect, test } from "@playwright/test";
+import { type Abi, ContractFunctionExecutionError, ContractFunctionRevertedError, type Hex } from "viem";
+import { daoGovernorAbi } from "~~/lib/dao/abis";
 import { type Phase, deriveProposal } from "~~/lib/dao/derive";
+import { decodeRevert } from "~~/lib/dao/errors";
 import { SCENARIOS, T0 } from "~~/lib/dao/fixtures/scenarios";
+import { revertDataOf } from "~~/lib/dao/live/source";
 import { buildProposal, ccipMessage, describeActions, encodeRequest } from "~~/lib/dao/proposal";
 import { timelockOperationId, timelockSalt } from "~~/lib/dao/source";
 import { formatDuration } from "~~/lib/dao/time";
@@ -64,8 +68,8 @@ test("fee above cap names both amounts and keeps Execute now enabled", async () 
   const view = await focusView("feeAboveCap");
   expect(view.banner.body).toContain("2.31 HBAR");
   expect(view.banner.body).toContain("2.00 HBAR");
-  expect(view.fallback.primary).toEqual({ enabled: true, kind: "execute", label: "Execute now" });
-  expect(view.fallback.body).toContain("FeeAboveCap(231000000, 200000000)");
+  expect(view.fallback?.primary).toEqual({ enabled: true, kind: "execute", label: "Execute now" });
+  expect(view.fallback?.body).toContain("FeeAboveCap(231000000, 200000000)");
 });
 
 test("a short treasury explains the shortfall", async () => {
@@ -145,4 +149,26 @@ test("units and durations", () => {
   expect(formatUnitsFixed(123_456_789n, 8)).toBe("1.23");
   expect(formatDuration(72)).toBe("1 min 12 s");
   expect(formatDuration(1354)).toBe("22 min");
+});
+
+test("a revert the governor's ABI does not know is still found and decoded before sending", () => {
+  // Measured on testnet: Execute now on a proposal whose fee cap is below the quote. The timelock's
+  // FeeAboveCap bubbles up through the governor, so viem cannot decode it with the governor's ABI and
+  // keeps the bytes in `raw`.
+  const raw: Hex =
+    "0x7159abd80000000000000000000000000000000000000000000000000000000006c87aa40000000000000000000000000000000000000000000000000000000002faf080";
+  const reverted = new ContractFunctionRevertedError({
+    abi: daoGovernorAbi as Abi,
+    data: raw,
+    functionName: "execute",
+  });
+  const error = new ContractFunctionExecutionError(reverted, {
+    abi: daoGovernorAbi as Abi,
+    functionName: "execute",
+    args: [[], [], [], `0x${"00".repeat(32)}`],
+  });
+  expect(revertDataOf(error)).toBe(raw);
+  expect(decodeRevert(revertDataOf(error)).name).toBe("FeeAboveCap");
+  // The RPC error underneath carries it in `data`.
+  expect(revertDataOf({ cause: { data: raw } })).toBe(raw);
 });

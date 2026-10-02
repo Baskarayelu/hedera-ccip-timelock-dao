@@ -604,6 +604,11 @@ textarea.dinput {
   font-size: 13px;
   color: var(--ink3);
 }
+.hint.low,
+.kpi-note.low {
+  color: var(--warn);
+  font-weight: 600;
+}
 .ftabs {
   display: flex;
   gap: 6px;

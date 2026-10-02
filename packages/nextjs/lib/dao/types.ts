@@ -96,7 +96,7 @@ export type ProposalRecord = {
   votes: { against: bigint; for: bigint; abstain: bigint };
   /** Quorum at the snapshot; for a pending proposal, what it would be now. */
   quorum: bigint;
-  /** vHGOV supply at the snapshot (null while the snapshot is in the future). */
+  /** Vote-token supply at the snapshot (null while the snapshot is in the future). */
   supplyAtSnapshot: bigint | null;
   eta: number; // 0 until queued
   events: GovernorEvent[];

@@ -8,6 +8,8 @@ import { defineConfig, devices } from "@playwright/test";
  */
 // Unit specs format times in the worker's zone; the browser projects use timezoneId below.
 process.env.TZ = "UTC";
+// Every spec here runs against fixtures, including the unit specs that import the data layer directly.
+process.env.NEXT_PUBLIC_DAO_FIXTURES = "true";
 
 const PORT = Number(process.env.E2E_PORT ?? 3100);
 /** `--project unit` needs no server. */
