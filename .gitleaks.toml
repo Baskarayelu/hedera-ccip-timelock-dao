@@ -1,0 +1,11 @@
+# gitleaks' default rules, with one exemption: a value that is exactly an EVM address (0x + 40 hex) is a
+# public contract or account address, not a secret. `npm run foundry:export` writes such addresses under
+# keys like `voteToken`, which the generic API-key rule would otherwise report. Private keys (64 hex) are
+# still reported.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Public EVM addresses"
+regexTarget = "secret"
+regexes = ['''^0x[0-9a-fA-F]{40}$''']
