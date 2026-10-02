@@ -30,6 +30,8 @@ Behaviour this template depends on, measured on Hedera testnet (services 0.77.2)
 
 **Accounts created from an EVM address associate automatically.** An account created by sending HBAR to a new EVM address has `max_automatic_token_associations = -1` (unlimited), so it can receive HGOV without associating first. Accounts with no free slot must call the token's HIP-719 `associate()`. The Voting power page reads the mirror node and tells the two apart.
 
+**OpenZeppelin's `DEFAULT_ADMIN_ROLE` is `bytes32(0)`**, not `keccak256("DEFAULT_ADMIN_ROLE")` as the other roles' pattern suggests. Renouncing the hash succeeds and changes nothing; this template's first testnet deployment did exactly that. The deploy script reads every role id from the timelock and checks, before it finishes, that the deployer is no longer admin and the governor holds its roles.
+
 **Multicall3 exists on testnet** at `0xcA11bde05977b3631167028862bE2a173976CA11`, though viem's chain definition does not list it. `scaffold.config.ts` adds it, so the frontend's reads batch into one call.
 
 ## Chainlink CCIP

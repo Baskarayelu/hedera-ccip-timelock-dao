@@ -7,7 +7,7 @@
  *
  * Settings come from packages/foundry/.env (see .env.example). Times are in seconds, HBAR amounts in HBAR.
  */
-import { createPublicClient, http, keccak256, toBytes, zeroAddress } from "viem";
+import { createPublicClient, http, zeroAddress } from "viem";
 
 import { readDeployment, writeDeployment } from "./lib/deployments.js";
 import { formatHbar, getNetwork, hbarToTinybar, tinybarToWeibar } from "./lib/networks.js";
@@ -85,12 +85,15 @@ const governor = await session.deploy(
   { gas: 8_000_000n },
 );
 
-const role = (name) => keccak256(toBytes(name));
-await session.write(timelock, "grantRole", [role("PROPOSER_ROLE"), governor.address], {
+// Role ids come from the contract: OpenZeppelin's DEFAULT_ADMIN_ROLE is 0x00, not the hash of its name.
+const [proposerRole, cancellerRole, adminRole] = await Promise.all(
+  ["PROPOSER_ROLE", "CANCELLER_ROLE", "DEFAULT_ADMIN_ROLE"].map((name) => session.read(timelock, name)),
+);
+await session.write(timelock, "grantRole", [proposerRole, governor.address], {
   gas: 200_000n,
   label: "governor may propose to the timelock",
 });
-await session.write(timelock, "grantRole", [role("CANCELLER_ROLE"), governor.address], {
+await session.write(timelock, "grantRole", [cancellerRole, governor.address], {
   gas: 200_000n,
   label: "governor may cancel in the timelock",
 });
@@ -110,10 +113,23 @@ await session.send(timelock.address, hbar(settings.treasuryHbar), {
   gas: 100_000n,
   label: `fund the treasury with ${settings.treasuryHbar} HBAR`,
 });
-const renounce = await session.write(timelock, "renounceRole", [role("DEFAULT_ADMIN_ROLE"), session.account.address], {
+const renounce = await session.write(timelock, "renounceRole", [adminRole, session.account.address], {
   gas: 200_000n,
   label: "renounce the deployer's admin role",
 });
+
+// Check the wiring that keeps the DAO in the voters' hands before calling the deploy done.
+const [deployerIsAdmin, governorProposes, governorCancels] = await Promise.all([
+  session.read(timelock, "hasRole", [adminRole, session.account.address]),
+  session.read(timelock, "hasRole", [proposerRole, governor.address]),
+  session.read(timelock, "hasRole", [cancellerRole, governor.address]),
+]);
+if (deployerIsAdmin || !governorProposes || !governorCancels) {
+  throw new Error(
+    `Timelock roles are wrong (deployer admin: ${deployerIsAdmin}, governor proposer: ${governorProposes}, governor canceller: ${governorCancels}).`,
+  );
+}
+console.log("  ✓ the deployer is no longer the timelock admin; only proposals can change the DAO");
 
 const baseClient = createPublicClient({
   chain: base.chain,

@@ -41,7 +41,7 @@ export default defineConfig({
   webServer: unitOnly
     ? undefined
     : {
-        command: `npx next build && node e2e/restore-next-env.cjs && npx next start --port ${PORT}`,
+        command: `node e2e/check-port.cjs ${PORT} && npx next build && node e2e/restore-next-env.cjs && npx next start --port ${PORT}`,
         url: `http://localhost:${PORT}/api/health`,
         // Always start our own fixture build: a server already on the port may be another app or a live build.
         reuseExistingServer: false,

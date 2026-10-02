@@ -24,7 +24,7 @@ A DAO made from this template runs on Hedera testnet, and a freshly scaffolded p
 
 | Base Sepolia | Address | Source |
 |---|---|---|
-| The DAO's account (a minimal clone of `DaoAccount`) | [0xa0E81699e1BC4f571d90A941b01420796192B124](https://sepolia.basescan.org/address/0xa0E81699e1BC4f571d90A941b01420796192B124) | |
+| The DAO's account (a minimal clone of `DaoAccount`) | [0xa0E81699e1BC4f571d90A941b01420796192B124](https://sepolia.basescan.org/address/0xa0E81699e1BC4f571d90A941b01420796192B124) | [Sourcify](https://repo.sourcify.dev/84532/0x9Bca21242bE1A189450f92BC064F2AA230D2c68F) (implementation) |
 | `CrossChainExecutor`, shared by every DAO from this template | [0x9B7691B0766A55D8509b07Cb633Ce281feE2A632](https://sepolia.basescan.org/address/0x9B7691B0766A55D8509b07Cb633Ce281feE2A632) | [Sourcify](https://repo.sourcify.dev/84532/0x9B7691B0766A55D8509b07Cb633Ce281feE2A632) |
 | `RemoteParameters`, shared demo target | [0x5f8b11a830ce09d87fA586c95e7C85FA57691cd9](https://sepolia.basescan.org/address/0x5f8b11a830ce09d87fA586c95e7C85FA57691cd9) | [Sourcify](https://repo.sourcify.dev/84532/0x5f8b11a830ce09d87fA586c95e7C85FA57691cd9) |
 
@@ -37,7 +37,7 @@ A DAO made from this template runs on Hedera testnet, and a freshly scaffolded p
 You need:
 
 - Node 20.18.3 or later.
-- A Git user name and email that apply in the folder you run the CLI from. The CLI reads `git config user.name` and `user.email` there before it creates a repository, so set a global identity (`git config --global user.name "…"` and `git config --global user.email "…"`). If you keep identities per folder instead (an `includeIf` rule), make a folder inside the path your rule matches a repository first, so the rule applies: `mkdir work && cd work && git init`, then run the CLI there; the project gets its own repository inside, and you can delete `work/.git` afterwards.
+- A Git user name and email that apply in the folder you run the CLI from. The CLI reads `git config user.name` and `user.email` there before it creates a repository, so set a global identity (`git config --global user.name "…"` and `git config --global user.email "…"`). If an `includeIf` rule supplies your identity instead, create a repository under the path the rule matches and run the CLI inside it: `mkdir work && cd work && git init`, check with `git config user.email`, then scaffold there. The project gets its own repository inside `work`; delete `work/.git` afterwards if you like.
 - Foundry: install it with `curl -L https://foundry.paradigm.xyz | bash`, then run `foundryup`. `make` must be available too (on macOS it comes with the Xcode command line tools). Any version from 1.4 builds, tests and deploys; `npm run lint` needs 1.8.4 or later (`foundryup --install 1.8.4`). Before 1.8.4, builds print harmless `unknown id` warnings for lint rules that version does not know.
 
 Scaffold and run the template with npm, and leave the CLI's `--package-manager` option at its default; other package managers are not supported.
@@ -50,7 +50,7 @@ npm run next:dev
 
 The CLI asks whether to add the Hedera Skills agent guides (either answer works) and which network to use: choose **Testnet**. It installs the dependencies itself. To skip the questions, as CI and coding agents must, add `--yes --skip-hedera-skills --network testnet` after the template.
 
-Open http://localhost:3000. The app opens the live testnet DAO.
+Open http://localhost:3000 (if that port is taken, Next.js uses the next free one and prints it). The app opens the live testnet DAO; its proposals load in the browser.
 
 To use npm's `create` command instead, write `create scaffold-hbar@latest my-dao -- --template Baskarayelu/hedera-ccip-timelock-dao` after `npm`: the `--` passes the flags through to the CLI, and the non-interactive flags go after it too.
 
@@ -74,7 +74,7 @@ npm run foundry:export             # points the frontend at your DAO
 
 To deploy from an existing testnet key, put `DEPLOYER_PRIVATE_KEY=0x…` in `.env.local` at the repository root instead; it takes precedence over `packages/foundry/.env`. Both files are gitignored. Voting periods, quorum, gas limits and HBAR amounts are set in `packages/foundry/.env`, which installing copies from `packages/foundry/.env.example`.
 
-The script prints the DAO's account address on Base Sepolia. Fund it with Base Sepolia ETH to pay for its own receipts (the executor sponsors the first ten), and with any tokens the DAO should control there.
+The script prints the DAO's account address on Base Sepolia. Fund it with Base Sepolia ETH to pay for its own receipts (while it holds too little, the executor's sponsor pool pays for up to ten), and with any tokens the DAO should control there.
 
 ## How it works
 
@@ -122,7 +122,7 @@ Run these from the repository root.
 |---|---|
 | `npm run next:dev` | The app at http://localhost:3000 |
 | `npm run test` | 60 Foundry tests and the frontend's data-layer tests |
-| `npm run next:test:e2e` | Every page and state in the browser (run `npx playwright install chromium` once first). It builds into `packages/nextjs/.next-e2e` and serves on port 3100; set `E2E_PORT` to use another port. |
+| `npm run next:test:e2e` | Every page and state in the browser (run `npx playwright install chromium` once first). It builds into `packages/nextjs/.next-e2e` and serves on port 3100; if that port is busy it stops at once and says so: set `E2E_PORT` to another port. |
 | `npm run lint` | ESLint and Prettier, `forge fmt`, `forge lint` (Foundry 1.8.4 or later), and the docs check. Next.js prints a notice that `next lint` is deprecated; it needs no action. |
 | `npm run build` | Compile the contracts and build the app |
 | `npm run foundry:deploy:hedera` | Deploy a DAO to Hedera testnet |

@@ -20,7 +20,7 @@ Settings: 1 minute voting delay, 5 minute vote, 2 minute timelock, 4% quorum; ca
 
 ### Deployment
 
-From `0x92947b03E93c5c9517A573Ca4270794fBE407218`, with `npm run foundry:deploy:hedera`:
+From `0x92947b03E93c5c9517A573Ca4270794fBE407218`, with `npm run foundry:deploy:hedera`. Since the last row, the deployer holds no role in the timelock, which administers itself: only proposals can change it.
 
 | Step | Transaction |
 |---|---|
@@ -36,7 +36,8 @@ From `0x92947b03E93c5c9517A573Ca4270794fBE407218`, with `npm run foundry:deploy:
 | Associate the treasury with HGOV | [0xd98d67eb…](https://hashscan.io/testnet/transaction/0xd98d67eb73412de83eaba347190e08967ffd03a5b3f510cc2ceb71142c2818f5) |
 | Fund the callback float (15 HBAR) | [0xfc58fc46…](https://hashscan.io/testnet/transaction/0xfc58fc46eb4083de7d9e24e4e61733330277bc370a957d0cd3d3c1e97e08e791) |
 | Fund the treasury (20 HBAR) | [0x18a97f32…](https://hashscan.io/testnet/transaction/0x18a97f32bad66b5faa81545737ae398606cff7e385d0e7cc2ca1ed2c5e269d87) |
-| Deployer renounces the admin role | [0x71d7e751…](https://hashscan.io/testnet/transaction/0x71d7e7510d9e5449bd7785840486c9d1c54b789404c6178f953804d50f96eb45) |
+| Deployer renounces the admin role: this call used the hash of the role's name instead of OpenZeppelin's `0x00` id, so it changed nothing | [0x71d7e751…](https://hashscan.io/testnet/transaction/0x71d7e7510d9e5449bd7785840486c9d1c54b789404c6178f953804d50f96eb45) |
+| Deployer renounces the real admin role (`RoleRevoked(0x00, deployer)`), after a first-time run of the README caught the mistake; the deploy script now reads role ids from the contract and checks the roles before it finishes | [0x2cbaefb9…](https://hashscan.io/testnet/transaction/0x2cbaefb963fe024fc426f9b16e7c26fc8c65331fd2782957c2b01a9cbd318bef) |
 
 After the four proposals, the deployer topped up the callback float and the treasury so that people trying the DAO have room to run their own proposals (anyone can send HBAR to either):
 
