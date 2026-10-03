@@ -1,6 +1,6 @@
 # Proofs
 
-Everything below happened on Hedera testnet and Base Sepolia on 2 October 2026, through this repository's app and contracts: one DAO, two voters, four proposals. The Hedera network itself (HIP-1215 scheduled calls) queued each proposal and then executed it, or for proposal 2 stopped it at its fee cap; no keeper, bot or second transaction was involved after the votes.
+Everything below happened on Hedera testnet and Base Sepolia through this repository's app and contracts: one DAO, three voters, five proposals. Proposals 1 to 4 ran on 2 October 2026; proposal 7 ran on 3 October 2026 while the demo video was filmed (proposals 5 and 6, USDC payouts made that morning, are not listed). The Hedera network itself (HIP-1215 scheduled calls) queued each proposal and then executed it, or for proposal 2 stopped it at its fee cap; no keeper, bot or second transaction was involved after the votes.
 
 `npm run check:proofs` re-verifies every link in this file, and CI runs it on every push and once a day. Links that prove a specific effect (an event, a revert reason, a token transfer) are checked for it too; the expectations live in [`docs/proofs.json`](docs/proofs.json).
 
@@ -20,7 +20,7 @@ Settings: 1 minute voting delay, 5 minute vote, 2 minute timelock, 4% quorum; ca
 
 ### Deployment
 
-From `0x92947b03E93c5c9517A573Ca4270794fBE407218`, with `npm run foundry:deploy:hedera`. That account (voter A below) kept the timelock's admin role until the last row, at 18:43 UTC on 2 October: after the four proposals and the top-ups. The timelock's logs show it was never used: no role granted or revoked, no executor or token changed between the deployment and the renounce. Since then the deployer holds no role, and the timelock administers itself: only proposals can change it.
+From `0x92947b03E93c5c9517A573Ca4270794fBE407218`, with `npm run foundry:deploy:hedera`. That account (voter A below) kept the timelock's admin role until the last row, at 18:43 UTC on 2 October: after proposals 1 to 4 and the top-ups. The timelock's logs show it was never used: no role granted or revoked, no executor or token changed between the deployment and the renounce. Since then the deployer holds no role, and the timelock administers itself: only proposals can change it.
 
 | Step | Transaction |
 |---|---|
@@ -39,7 +39,7 @@ From `0x92947b03E93c5c9517A573Ca4270794fBE407218`, with `npm run foundry:deploy:
 | Deployer renounces the admin role: this call used the hash of the role's name instead of OpenZeppelin's `0x00` id, so it changed nothing | [0x71d7e751…](https://hashscan.io/testnet/transaction/0x71d7e7510d9e5449bd7785840486c9d1c54b789404c6178f953804d50f96eb45) |
 | Deployer renounces the real admin role (`RoleRevoked(0x00, deployer)`), after a first-time run of the README caught the mistake; the deploy script now reads role ids from the contract and checks the roles before it finishes | [0x2cbaefb9…](https://hashscan.io/testnet/transaction/0x2cbaefb963fe024fc426f9b16e7c26fc8c65331fd2782957c2b01a9cbd318bef) |
 
-After the four proposals, the deployer topped up the callback float and the treasury so that people trying the DAO have room to run their own proposals (anyone can send HBAR to either):
+After proposals 1 to 4, the deployer topped up the callback float and the treasury so that people trying the DAO have room to run their own proposals (anyone can send HBAR to either):
 
 | Top-up | Transaction |
 |---|---|
@@ -48,16 +48,17 @@ After the four proposals, the deployer topped up the callback float and the trea
 
 ### Voting power
 
-Two voters, each through the app's *Voting power* page. Both accounts associate with new tokens automatically, so neither needed the association step.
+Three voters, each through the app's *Voting power* page. Voters A and B associate with new tokens automatically, so neither needed the association step; voter C was created with no automatic-association slots, so it associated first.
 
-| Step | Voter A `0x9294…7218` (wrapped all 1,000 HGOV) | Voter B `0x3f24…1Bd7` (wrapped 600 of its 1,000 HGOV) |
-|---|---|---|
-| Claim 1,000 HGOV | [0xe6964a49…](https://hashscan.io/testnet/transaction/0xe6964a492ea01949d92e4e3e68d3ac029f82b9a975c03ae73d3a6aa76b90e4ac) | [0xd2a94d55…](https://hashscan.io/testnet/transaction/0xd2a94d55f75f78081f0f976bccb1d5b59063f26374e6a8e49841394dd9c29152) |
-| Approve | [0xc67b4f04…](https://hashscan.io/testnet/transaction/0xc67b4f0428aeabb76cc78fc26c55317b3f9404f34fca81f364403d8a3d6c0b23) | [0x22ff32bc…](https://hashscan.io/testnet/transaction/0x22ff32bccdfbd64e8427833652fa352ee8a788c3a84ca519a8987cf105107388) |
-| Wrap | [0x9ec7aca7…](https://hashscan.io/testnet/transaction/0x9ec7aca7cc6a1f968e5231e5466f993e67461d77d523499738faa46e5d65e859) | [0x42789ca0…](https://hashscan.io/testnet/transaction/0x42789ca0240ba4852b5147a1f9398c81775ee572b72ff19f28b1430c2e02f647) |
-| Delegate to self | [0xe743de65…](https://hashscan.io/testnet/transaction/0xe743de653ed6705e6849251d7f5a290eb5cd6374a039c2eca46369cd5adafb98) | [0x68fd0786…](https://hashscan.io/testnet/transaction/0x68fd07863ff07314dcc6a49d768d36b36b078288afca9c71032de3e3fde1dac9) |
+| Step | Voter A `0x9294…7218` (wrapped all 1,000 HGOV) | Voter B `0x3f24…1Bd7` (wrapped 600 of its 1,000 HGOV) | Voter C `0xE10d…fa13` (wrapped all 1,000 HGOV) |
+|---|---|---|---|
+| Associate HGOV | not needed | not needed | [0x81201946…](https://hashscan.io/testnet/transaction/0x81201946d3801ecf422939bbbd609c0bdf20a08c97fd6f7e4f3823094b905e21) |
+| Claim 1,000 HGOV | [0xe6964a49…](https://hashscan.io/testnet/transaction/0xe6964a492ea01949d92e4e3e68d3ac029f82b9a975c03ae73d3a6aa76b90e4ac) | [0xd2a94d55…](https://hashscan.io/testnet/transaction/0xd2a94d55f75f78081f0f976bccb1d5b59063f26374e6a8e49841394dd9c29152) | [0xcd3ee053…](https://hashscan.io/testnet/transaction/0xcd3ee053c8345ef2a3fb89b96d4bb20dfc3c7e56f96ce0f1ea5bb8b3319d9a9e) |
+| Approve | [0xc67b4f04…](https://hashscan.io/testnet/transaction/0xc67b4f0428aeabb76cc78fc26c55317b3f9404f34fca81f364403d8a3d6c0b23) | [0x22ff32bc…](https://hashscan.io/testnet/transaction/0x22ff32bccdfbd64e8427833652fa352ee8a788c3a84ca519a8987cf105107388) | [0x2e344f33…](https://hashscan.io/testnet/transaction/0x2e344f33dd7a91ce5474d2193484c33f0c78d0f4bcb6f829856ef2e8507f7c80) |
+| Wrap | [0x9ec7aca7…](https://hashscan.io/testnet/transaction/0x9ec7aca7cc6a1f968e5231e5466f993e67461d77d523499738faa46e5d65e859) | [0x42789ca0…](https://hashscan.io/testnet/transaction/0x42789ca0240ba4852b5147a1f9398c81775ee572b72ff19f28b1430c2e02f647) | [0x703ef6f4…](https://hashscan.io/testnet/transaction/0x703ef6f440140f703cacced32d1b67241334df96209a73a2c9f04366f7937c42) |
+| Delegate to self | [0xe743de65…](https://hashscan.io/testnet/transaction/0xe743de653ed6705e6849251d7f5a290eb5cd6374a039c2eca46369cd5adafb98) | [0x68fd0786…](https://hashscan.io/testnet/transaction/0x68fd07863ff07314dcc6a49d768d36b36b078288afca9c71032de3e3fde1dac9) | [0x2fe060c5…](https://hashscan.io/testnet/transaction/0x2fe060c5047015982fb4c49da318dc1d7157b49b93e91014066b8ba64d21a65a) |
 
-Voter A proposed all four proposals; both voted For on each. Voter A's four setup transactions cost 1.42 HBAR in gas; each proposal then cost them about 1.23–1.24 HBAR to create and 0.07 HBAR to vote on, so setup, one proposal and its vote came to 2.72 HBAR (proposal 1) or 2.73 HBAR (proposal 3).
+Voter A proposed proposals 1 to 4; A and B voted For on each. Voter A's four setup transactions cost 1.42 HBAR in gas; each proposal then cost them about 1.23–1.24 HBAR to create and 0.07 HBAR to vote on, so setup, one proposal and its vote came to 2.72 HBAR (proposal 1) or 2.73 HBAR (proposal 3). Voter C proposed proposal 7 and was its only voter: its 1,000 vHGOV met the quorum of 104 (4% of the 2,600 vHGOV that existed at the snapshot).
 
 ## Proposal 1: a Hedera-only payment
 
@@ -113,13 +114,28 @@ On the proposal's page, *Execute now* from a funded wallet then showed "the CCIP
 | The receipt travelled back after Base Sepolia finality | [message 0xc929a98e…](https://ccip.chain.link/msg/0xc929a98e93acb1aae7bb8f8d623efed14e25dae21577ff52f02b87716510b0a3) |
 | The timelock recorded it (`CrossChainReceipt`, Executed), 22 min 13 s after the call ran on Base | [0x495b93a6…](https://hashscan.io/testnet/transaction/0x495b93a602034d7b68c75c81f14f7a411fe058070a80ad2aeb37d0cd270aa1d8) |
 
+## Proposal 7: a USDC payout on Base Sepolia, filmed for the demo video
+
+*Pay a 4 USDC contributor grant on Base.* Proposed and voted through the app by voter C. The DAO's account on Base transfers 4 USDC (Circle's testnet USDC) to `0xE10d…fa13`. Proposal ID 85186459177389681870927155308209443303174489888787916571113138667700472878592.
+
+| Step | Proof |
+|---|---|
+| Proposed (also scheduled the network to queue it) | [0xdaa27794…](https://hashscan.io/testnet/transaction/0xdaa2779488da90b61b4b4e167e66ddf244cfa05e593bfcbacb3bb3a6b24c1f58) |
+| Vote: C | [0x062a62ed…](https://hashscan.io/testnet/transaction/0x062a62edfb8eedf88876c753e3ae4a20d870733dbbb1b00a8cc971bdd6522660) |
+| The network queued it, 5 s after voting ended | [schedule 0.0.10835762](https://hashscan.io/testnet/schedule/0.0.10835762), which ran as [0x202268b2…](https://hashscan.io/testnet/transaction/0x202268b213e1f435fc34b73f66d752e8311db5f316ee14a6ab2b90c2f181d745) |
+| The network executed it, 4 s after the timelock ended, and sent one CCIP message (fee 1.186 HBAR) | [schedule 0.0.10835832](https://hashscan.io/testnet/schedule/0.0.10835832), which ran as [0x03ffaa37…](https://hashscan.io/testnet/transaction/0x03ffaa3797c9e1d3722e5882e2d2d473ef166559f314a9d352b3e0213c97bf20) |
+| CCIP delivered it to Base Sepolia, 35 s later | [message 0xab6c8d03…](https://ccip.chain.link/msg/0xab6c8d0354bff01c9c6c8e4748d8e26df5aa52648c16658fcd57daef8c633328) |
+| 4 USDC moved from the DAO's account to the recipient; receipt paid from the DAO's account | [Base tx 0x3d746f89…](https://sepolia.basescan.org/tx/0x3d746f89d2ad36886e9892646fa540d05eb34fc21b0e240f00b98345c9ab0147) |
+| The receipt travelled back after Base Sepolia finality | [message 0x337853f9…](https://ccip.chain.link/msg/0x337853f995614dc8fcd9224220926de8ac48e78b54bd4000db79e492cac0b575) |
+| The timelock recorded it (`CrossChainReceipt`, Executed), 19 min 18 s after the call ran on Base | [0x84e1ee0e…](https://hashscan.io/testnet/transaction/0x84e1ee0e655c2f08d718af52880d59c65209e0d602a10a70e26f4ec570e87d15) |
+
 ## What the runs measured
 
-| | Proposal 3 | Proposal 4 |
-|---|---|---|
-| Voting ended → queued by the network | 5 s | 5 s |
-| Timelock ended → executed by the network | 4 s | 4 s |
-| Executed on Hedera → ran on Base Sepolia | 32 s | 35 s |
-| Ran on Base → receipt recorded on Hedera | 23 min 54 s | 22 min 13 s |
+| | Proposal 3 | Proposal 4 | Proposal 7 |
+|---|---|---|---|
+| Voting ended → queued by the network | 5 s | 5 s | 5 s |
+| Timelock ended → executed by the network | 4 s | 4 s | 4 s |
+| Executed on Hedera → ran on Base Sepolia | 32 s | 35 s | 35 s |
+| Ran on Base → receipt recorded on Hedera | 23 min 54 s | 22 min 13 s | 19 min 18 s |
 
-The receipt leg is almost all Base Sepolia finality: the blocks with the calls finalized 23 min 34 s (proposal 3) and 21 min 32 s (proposal 4) after they ran, and CCIP took 20 s and 41 s after that. Gas and HBAR for every step are in [Costs](docs/costs.md).
+The receipt leg is almost all Base Sepolia finality: the blocks with the calls finalized 23 min 34 s (proposal 3) and 21 min 32 s (proposal 4) after they ran, and CCIP took 20 s and 41 s after that. Base Sepolia's finality lag changes from run to run, which is why proposal 7's receipt came back faster; the app shows the live lag and its estimate while a receipt is on its way. Gas and HBAR for every step are in [Costs](docs/costs.md).
