@@ -5,7 +5,7 @@ The DAO lives on Hedera testnet. It can act on Hedera directly and on Base Sepol
 ## Contracts
 
 ```mermaid
-flowchart LR
+flowchart TB
   subgraph Hedera testnet
     HGOV[["HGOV<br/>HTS fungible token"]]
     Faucet["GovTokenFaucet<br/>creates HGOV, demo claims"]
@@ -52,27 +52,25 @@ flowchart LR
 ```mermaid
 sequenceDiagram
   autonumber
-  actor P as Proposer
-  actor V as Voters
+  actor M as Members
   participant G as DaoGovernor
   participant H as Schedule Service
   participant T as DaoTimelock
-  participant C as CCIP
-  participant E as Executor + DaoAccount (Base)
+  participant E as Base executor<br/>and DAO account
 
-  P->>G: propose(targets, values, calldatas, description)
-  G->>H: scheduleCall(autoQueue, voteEnd + 1 + 4 s)
-  Note over G,H: one scheduleCall per transaction, after an in-transaction capacity probe
-  V->>G: castVote (weight = getPastVotes at the snapshot)
+  M->>G: propose(targets,<br/>values, calldatas,<br/>description)
+  G->>H: scheduleCall(<br/>autoQueue,<br/>voteEnd + 5 s)
+  Note over G,H: one scheduleCall per tx,<br/>after a capacity probe
+  M->>G: castVote (weight =<br/>getPastVotes<br/>at the snapshot)
   H->>G: autoQueue (no keeper)
   G->>T: queue (scheduleBatch)
-  G->>H: scheduleCall(autoExecute, eta + 4 s)
+  G->>H: scheduleCall(<br/>autoExecute,<br/>eta + 4 s)
   H->>G: autoExecute
   G->>T: execute (executeBatch)
-  T->>C: sendCrossChain: quote the fee, refuse above the voted cap, ccipSend
-  C->>E: ccipReceive: check expiry, run the batch from the DAO's account
-  E->>C: receipt (Executed, Failed with reason, or Expired)
-  C->>T: ccipReceive: store the receipt, emit CrossChainReceipt
+  T->>E: sendCrossChain over<br/>CCIP: fee quoted,<br/>refused above cap
+  Note over E: check expiry,<br/>run the batch from<br/>the DAO's account
+  E->>T: receipt over CCIP<br/>(Executed, Failed<br/>or Expired)
+  Note over T: store it, emit<br/>CrossChainReceipt
 ```
 
 Details that matter:
@@ -88,15 +86,15 @@ Details that matter:
 `packages/nextjs` is a Next.js App Router app with four pages: Proposals (`/`), New proposal (`/proposals/new`), a proposal's detail (`/proposals/<id>`) and Voting power (`/voting-power`). The Debug page from Scaffold-HBAR stays at `/debug`.
 
 ```mermaid
-flowchart LR
+flowchart TB
   Pages["Pages<br/>components/dao/pages"] --> Hooks["hooks.ts<br/>React Query"]
   Hooks --> Source{{"DaoSource"}}
   Source --> Live["live/source.ts"]
   Source --> Fix["fixtures/world.ts<br/>(e2e tests only)"]
-  Live --> Mirror["Mirror node<br/>logs, schedules, accounts"]
-  Live --> RPC["Hashio JSON-RPC<br/>multicall reads, writes"]
-  Live --> Proxy["/api/ccip/[id]<br/>CCIP explorer proxy"]
-  Live --> Base["Base Sepolia RPC<br/>receipts, balances, finality"]
+  Live --> Mirror["Mirror node<br/>logs, schedules"]
+  Live --> RPC["Hashio RPC<br/>reads, writes"]
+  Live --> Proxy["/api/ccip/[id]<br/>CCIP proxy"]
+  Live --> Base["Base Sepolia<br/>receipts, finality"]
   Hooks --> Derive["derive.ts<br/>phase, banner, timeline, fallbacks"]
 ```
 

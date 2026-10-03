@@ -1,5 +1,7 @@
 # hedera-ccip-timelock-dao
 
+[![Docs site](https://img.shields.io/badge/docs-hedera--ccip--timelock--dao--docs.vercel.app-2563eb)](https://hedera-ccip-timelock-dao-docs.vercel.app) **[Docs site](https://hedera-ccip-timelock-dao-docs.vercel.app)**
+
 A [Scaffold-HBAR](https://github.com/hedera-dev/create-scaffold-hbar) template for a token-governed DAO on Hedera whose proposals queue and execute themselves, on Hedera or on Base Sepolia.
 
 - **Vote with an HTS token, safely.** Holders wrap the HTS governance token 1:1 into an `ERC20Votes` token, so each vote counts the balance at the proposal's snapshot. Tokens bought after a vote opens cannot vote on it. ([Why wrap to vote](docs/wrap-to-vote.md))
@@ -85,12 +87,12 @@ sequenceDiagram
   participant H as Schedule Service
   participant T as Timelock (Hedera)
   participant E as Executor (Base Sepolia)
-  G->>H: propose: schedule autoQueue at voting end
-  H->>G: autoQueue: queue, schedule autoExecute at the ETA
+  G->>H: propose: schedule<br/>autoQueue at voting end
+  H->>G: autoQueue: queue, schedule<br/>autoExecute at the ETA
   H->>G: autoExecute: execute
-  G->>T: run actions; send Base calls over CCIP (fee quoted, capped)
-  T->>E: CCIP: run calls from the DAO's account
-  E->>T: CCIP: receipt (executed, failed with reason, or expired)
+  G->>T: run actions, send Base calls<br/>over CCIP (fee quoted, capped)
+  T->>E: CCIP: run calls from<br/>the DAO's account
+  E->>T: CCIP: receipt (executed,<br/>failed with reason, or expired)
 ```
 
 [Architecture](docs/architecture.md) covers the contracts, the full sequence and the frontend's data layer. [Threat model](docs/threat-model.md) lists what is protected and how, including what is demo-only.
@@ -131,9 +133,11 @@ Run these from the repository root.
 | `npm run foundry:verify:hedera` | Verify the deployed DAO's contracts on Sourcify |
 | `npm run foundry:export` | Regenerate the app's ABIs and addresses from `packages/foundry/deployments` |
 | `npm run check:proofs` | Re-verify every HashScan, CCIP explorer, Basescan and Sourcify link in the docs |
+| `npm run check:mermaid` | Render every Mermaid diagram in the docs in Chromium, failing on one that breaks or is too wide to read |
 
 ## Docs
 
+- [Docs site](https://hedera-ccip-timelock-dao-docs.vercel.app): this README, the docs below and PROOFS.md as one searchable site
 - [Architecture](docs/architecture.md): contracts, a proposal's life, the frontend's data layer
 - [Why wrap to vote](docs/wrap-to-vote.md): HTS has no vote checkpoints, and what that means
 - [Threat model](docs/threat-model.md): assets, trust, attacks and mitigations

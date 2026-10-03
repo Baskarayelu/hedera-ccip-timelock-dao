@@ -61,6 +61,9 @@ jobs:
         working-directory: packages/nextjs
         run: npx playwright install --with-deps chromium
 
+      - name: Every Mermaid diagram in the docs renders, legibly
+        run: npm run check:mermaid
+
       - name: End-to-end tests
         run: npm run next:test:e2e
 

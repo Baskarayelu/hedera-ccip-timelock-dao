@@ -35,7 +35,8 @@
     "foundry:verify:base-sepolia": "npm run verify:base-sepolia -w @sh/foundry --",
     "next:test:unit": "npm run test:unit -w @sh/nextjs --",
     "next:test:e2e": "npm run test:e2e -w @sh/nextjs --",
-    "check:proofs": "node scripts/check-proofs.mjs"
+    "check:proofs": "node scripts/check-proofs.mjs",
+    "check:mermaid": "node scripts/check-mermaid.mjs"
   },
   "overrides": {
     "@coinbase/cdp-sdk": "1.44.1"
