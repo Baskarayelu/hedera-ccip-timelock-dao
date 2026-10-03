@@ -20,7 +20,8 @@ export async function GET(req: Request) {
   const url = `${base}/api/v1/accounts/${evm}`;
 
   try {
-    const res = await fetch(url, { next: { revalidate: 60 } });
+    // Not cached: the balance and whether the account exists change when someone funds it.
+    const res = await fetch(url, { cache: "no-store" });
 
     if (!res.ok) {
       if (res.status === 404) {
@@ -29,9 +30,17 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Mirror node request failed", status: res.status }, { status: 502 });
     }
 
-    const data = (await res.json()) as { account?: string };
+    const data = (await res.json()) as {
+      account?: string;
+      balance?: { balance?: number };
+      max_automatic_token_associations?: number;
+    };
     const accountId = typeof data.account === "string" ? data.account : null;
-    return NextResponse.json({ accountId });
+    return NextResponse.json({
+      accountId,
+      balance: data.balance?.balance ?? 0,
+      maxAutomaticTokenAssociations: data.max_automatic_token_associations ?? 0,
+    });
   } catch (e) {
     console.error("[api/hedera/account]", e);
     return NextResponse.json({ error: "Resolution failed" }, { status: 502 });

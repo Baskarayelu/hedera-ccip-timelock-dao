@@ -14,7 +14,7 @@ What this template protects, against whom, and where it relies on trust. Contrac
 | Actor | Trusted for | Not trusted for |
 |---|---|---|
 | Token holders | Their own votes | Anything else |
-| Anyone | Nothing: `queue`, `execute` and `rearm` are permissionless, and cannot change what runs | — |
+| Anyone | Nothing: `queue`, `execute` and `rearm` are permissionless on the governor, and the timelock's executor role is open (`address(0)`), so anyone can also execute a ready operation on the timelock directly. None of these can change what runs, only when it runs after its delay | — |
 | Hedera network (consensus, HSS) | Running scheduled calls at their second, once | Retrying a failed call |
 | Chainlink CCIP | Delivering a message once, with the true source chain and sender | Timeliness, or a stable fee |
 | Other DAOs using the shared executor | Nothing | Touching this DAO's account |
@@ -39,7 +39,7 @@ What this template protects, against whom, and where it relies on trust. Contrac
 |---|---|
 | A busy second (response 370) costs gas and schedules nothing | `HssScheduler` probes `hasScheduleCapacity` inside the transaction for up to 8 consecutive seconds and calls `scheduleCall` once, in the first second with room. The relay's `eth_call` ignores throttles, so only the in-transaction probe is trusted. |
 | The schedule service is busy or unavailable | `propose` and `queue` still succeed; the governor emits `AutoActionUnavailable` with the response code, and anyone can `queue`, `execute` or `rearm` by hand. |
-| A callback fires before voting has really ended | Callbacks are scheduled 4 s after their target (`BLOCK_CLOCK_MARGIN`), because `block.timestamp` trails consensus time by up to ~3 s. Each callback also checks the proposal's state and emits `AutoActionSkipped` instead of acting when it is not ready. |
+| A callback fires before voting has really ended | Callbacks are scheduled 4 s (`BLOCK_CLOCK_MARGIN`) after the first second they may run: `voteEnd + 1` for the queue call (so 5 s after voting ends) and the ETA for the execute call, because `block.timestamp` trails consensus time by up to ~3 s. Each callback also checks the proposal's state and emits `AutoActionSkipped` instead of acting when it is not ready. |
 | The float cannot pay when a callback fires | The network consumes the schedule silently (`INSUFFICIENT_PAYER_BALANCE`, no event) and still charges the float a small fixed fee (0.027 HBAR measured). The float must hold the callback's full `gasLimit × price`, although only the gas used is billed. The frontend reads the schedule's result from the mirror node, shows the float balance, and offers "Schedule it again" and "Queue now" / "Execute now". Anyone can send HBAR to the governor to top up the float. |
 | A callback reverts | `autoQueue`/`autoExecute` catch the revert and emit `AutoActionFailed` with the reason, which the frontend decodes (for example `FeeAboveCap`). The proposal stays queued and can be executed or rescheduled. |
 | Someone fakes a callback | `autoQueue` and `autoExecute` revert with `OnlySelf` unless the caller is the governor itself, which only the schedule service can make it be. |

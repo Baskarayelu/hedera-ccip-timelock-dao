@@ -50,7 +50,7 @@ cd my-dao
 npm run next:dev
 ```
 
-The CLI asks whether to add the Hedera Skills agent guides (either answer works) and which network to use: choose **Testnet**. It installs the dependencies itself. To skip the questions, as CI and coding agents must, add `--yes --skip-hedera-skills --network testnet` after the template.
+The CLI asks whether to add the Hedera Skills agent guides (either answer works) and which network to use: choose **Testnet**. It installs the dependencies itself. Any deprecation warning printed while the CLI itself downloads (for example for `tar`) comes from its own dependencies and is harmless. To skip the questions, as CI and coding agents must, add `--yes --skip-hedera-skills --network testnet` after the template.
 
 Open http://localhost:3000 (if that port is taken, Next.js uses the next free one and prints it). The app opens the live testnet DAO; its proposals load in the browser.
 
@@ -59,7 +59,7 @@ To use npm's `create` command instead, write `create scaffold-hbar@latest my-dao
 ### Take part with a testnet wallet
 
 1. **Get a testnet account.** Create an ECDSA account at [portal.hedera.com](https://portal.hedera.com) and fund it from the [faucet](https://portal.hedera.com/faucet). About 10 HBAR covers every step below; they spend about 3 ([Costs](docs/costs.md)). Add Hedera testnet to your wallet (chain id 296, RPC `https://testnet.hashio.io/api`, currency symbol HBAR, explorer `https://hashscan.io/testnet`) and import the account's private key in its HEX form (the portal shows HEX and DER; wallets take the HEX one). The app's burner wallet is for looking around: it starts with no HBAR and no Hedera account, so it can act only after you send HBAR to its address from the faucet.
-2. **Voting power** page: press **Claim** to get 1,000 HGOV from the DAO's own faucet (once per account every 24 hours), then **Approve and wrap** to turn them into vHGOV (two wallet confirmations), then **Delegate to myself**: four confirmations in all. An association step appears first only if your account needs one.
+2. **Voting power** page: it lists four steps. The first, associating HGOV, is marked *Not needed* for most accounts (any account created by sending HBAR to its address). Then press **Claim** to get 1,000 HGOV from the DAO's own faucet (once per account every 24 hours), **Approve and wrap** to turn them into vHGOV (two wallet confirmations), and **Delegate to myself**: four confirmations in all. A wallet with no Hedera account yet sees the steps waiting until it is funded.
 3. **New proposal**: add a Base action such as *Set a parameter*. The page quotes the CCIP fee live and proposes a cap of twice the quote. Submit.
 4. **Vote** on the proposal's page once voting opens, 1 minute after you propose; voting stays open for 5 minutes. Then watch it: the network queues it 5 seconds after voting ends and executes it 2 minutes later (the timelock), about 8 minutes after you proposed. A Base action runs on Base Sepolia within a minute of that, and its receipt reaches Hedera once Base Sepolia finalizes the block, which took 22 to 24 minutes during our runs; the page estimates it live. The timeline links each step to HashScan, the CCIP explorer and Basescan.
 

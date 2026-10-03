@@ -462,8 +462,9 @@ export function NewProposalPage() {
               <div className="vstack" style={{ gap: 4 }}>
                 <h2 id="ccip-title">Cross-chain delivery</h2>
                 <p className="small muted" style={{ margin: 0, fontSize: 14 }}>
-                  {baseDrafts.length === 1 ? "The Base action travels" : `All ${baseDrafts.length} Base actions travel`}{" "}
-                  in one Chainlink CCIP message and run atomically from the DAO’s account.
+                  {baseDrafts.length === 1
+                    ? "The Base action travels in one Chainlink CCIP message and runs from the DAO’s account."
+                    : `All ${baseDrafts.length} Base actions travel in one Chainlink CCIP message and run atomically from the DAO’s account.`}
                 </p>
               </div>
               <div className="grid3">
@@ -480,7 +481,7 @@ export function NewProposalPage() {
                         ? fee.error
                           ? "Quote failed"
                           : "Quoting…"
-                        : "—"}
+                        : "Fill in the action to see it"}
                   </span>
                 </div>
                 <label className="field">

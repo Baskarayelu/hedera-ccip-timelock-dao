@@ -57,7 +57,25 @@ export type MirrorAccount = {
   max_automatic_token_associations: number;
 };
 
-export const account = (address: Address) => get<MirrorAccount>(`/api/v1/accounts/${address}`);
+/**
+ * The account behind an EVM address, or null when Hedera has none yet. Goes through the app's own route, which
+ * answers 200 either way, so a new wallet does not log a mirror-node 404 in the browser console.
+ */
+export async function account(address: Address): Promise<MirrorAccount | null> {
+  const res = await fetch(`/api/hedera/account?evm=${address}`, { cache: "no-store" });
+  if (!res.ok) throw new Error(`Account lookup ${res.status} for ${address}`);
+  const body = (await res.json()) as {
+    accountId: string | null;
+    balance: number;
+    maxAutomaticTokenAssociations: number;
+  };
+  if (!body.accountId) return null;
+  return {
+    account: body.accountId,
+    balance: { balance: body.balance },
+    max_automatic_token_associations: body.maxAutomaticTokenAssociations,
+  };
+}
 
 export type MirrorTokenRelationship = { token_id: string; automatic_association: boolean; balance: number };
 

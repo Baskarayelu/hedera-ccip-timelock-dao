@@ -87,7 +87,9 @@ function Steps({ voter }: { voter: VoterStatus }) {
   const [delegateMode, setDelegateMode] = useState<"self" | "other">("self");
   const [delegateTo, setDelegateTo] = useState("");
   const [changingDelegate, setChangingDelegate] = useState(false);
-  const blocked = wallet.wrongNetwork;
+  // A new address has no Hedera account until it receives HBAR; nothing here can run before that.
+  const noAccount = !voter.accountId;
+  const blocked = wallet.wrongNetwork || noAccount;
 
   // Prefill the wrap amount with the whole balance once it is known.
   useEffect(() => {
@@ -112,14 +114,17 @@ function Steps({ voter }: { voter: VoterStatus }) {
   const otherValid = isAddress(delegateTo.trim());
   const delegateTarget = delegateMode === "self" ? wallet.address : (delegateTo.trim() as Address);
 
-  const associateState: StepState = voter.associated ? "done" : canReceive ? "optional" : "current";
-  const claimState: StepState = coolingDown
+  // Funding a new address creates an account that associates with new tokens automatically.
+  const associateState: StepState = voter.associated ? "done" : canReceive || noAccount ? "optional" : "current";
+  const claimState: StepState = noAccount
     ? "waiting"
-    : !canReceive
+    : coolingDown
       ? "waiting"
-      : voter.gov + voter.voteBalance === 0n
-        ? "current"
-        : "available";
+      : !canReceive
+        ? "waiting"
+        : voter.gov + voter.voteBalance === 0n
+          ? "current"
+          : "available";
   const wrapState: StepState = voter.gov > 0n ? "current" : voter.voteBalance > 0n ? "done" : "waiting";
   const delegateState: StepState = voter.delegate ? "done" : voter.voteBalance > 0n ? "current" : "waiting";
   // Only one step is highlighted: the first that is current.
@@ -154,9 +159,11 @@ function Steps({ voter }: { voter: VoterStatus }) {
           body="Hedera accounts opt in to each token (HIP-719). One transaction."
           note={
             associateState === "optional"
-              ? voter.autoAssociationSlots === -1
-                ? "Not needed: your account associates with new tokens automatically."
-                : `Not needed: your account has ${voter.autoAssociationSlots} free automatic-association slot${voter.autoAssociationSlots === 1 ? "" : "s"}.`
+              ? noAccount
+                ? "Not needed: funding this address creates an account that associates with new tokens automatically."
+                : voter.autoAssociationSlots === -1
+                  ? "Not needed: your account associates with new tokens automatically."
+                  : `Not needed: your account has ${voter.autoAssociationSlots} free automatic-association slot${voter.autoAssociationSlots === 1 ? "" : "s"}.`
               : undefined
           }
         >

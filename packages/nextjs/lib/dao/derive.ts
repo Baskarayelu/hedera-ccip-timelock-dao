@@ -546,14 +546,20 @@ function timeline(
       step.link = undefined;
     }
   });
+  // A failed attempt shows when the network ran it and links its schedule, the record of what happened.
+  const attempt = (action: AutoAction) => {
+    const ranAt = p.schedules[action]?.executedAt;
+    return { time: ranAt ? formatWhen(ranAt, now) : "", link: scheduleLink(action) };
+  };
   if (failedAt[phase] === 2) {
     steps[2].title = "Queue attempt failed";
     steps[2].detail = "The reason is shown above; it can still be queued.";
+    Object.assign(steps[2], attempt(AutoAction.Queue));
   }
   if (failedAt[phase] === 3) {
     steps[3].title = "Execution attempt failed";
     steps[3].detail = "The reason is shown above; the proposal stays queued.";
-    steps[3].time = "";
+    Object.assign(steps[3], attempt(AutoAction.Execute));
   }
   if (phase === "remoteFailed" || phase === "expired") {
     steps[5].detail = "The DAO’s account did not run the calls.";
