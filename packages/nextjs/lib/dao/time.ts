@@ -1,14 +1,18 @@
-/** All times are unix seconds. Display uses the viewer's local time zone. */
+/**
+ * All times are unix seconds. Display uses the viewer's local time zone. Clock times are rounded to the nearest
+ * second, like elapsed times, so two clocks on a page subtract to the duration shown beside them.
+ */
+const toDate = (ts: number) => new Date(Math.round(ts) * 1000);
 
 export function formatClock(ts: number): string {
-  return new Date(ts * 1000).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  return toDate(ts).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
 /** "14:20:01" for today, "1 Oct 14:20:01" for other days. */
 export function formatWhen(ts: number, now: number): string {
-  const day = (t: number) => new Date(t * 1000).toDateString();
+  const day = (t: number) => toDate(t).toDateString();
   if (day(ts) === day(now)) return formatClock(ts);
-  const date = new Date(ts * 1000);
+  const date = toDate(ts);
   return `${date.toLocaleDateString("en-GB", { day: "numeric", month: "short" })} ${date.toLocaleTimeString("en-GB", {
     hour: "2-digit",
     minute: "2-digit",

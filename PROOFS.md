@@ -131,7 +131,7 @@ On the proposal's page, *Execute now* from a funded wallet then showed "the CCIP
 
 ## What the runs measured
 
-Times are rounded to the nearest second, the rule the app uses when it shows a measured time.
+Times are rounded to the nearest second, the rule the app uses for the clock times and durations it shows. The app shows HBAR amounts cut to two decimals, so a fee of 1.186 HBAR appears there as 1.18 HBAR.
 
 | | Proposal 3 | Proposal 4 | Proposal 7 |
 |---|---|---|---|
