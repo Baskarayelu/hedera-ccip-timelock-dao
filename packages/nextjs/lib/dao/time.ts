@@ -34,6 +34,22 @@ export function formatDuration(seconds: number): string {
   return h ? `${d} d ${h} h` : `${d} d`;
 }
 
+/**
+ * A measured elapsed time, rounded to the nearest second and shown to the second: "35 s", "19 min 18 s",
+ * "1 h 2 min 5 s" (a zero seconds part is left out: "23 min"). PROOFS.md states its measured times the same way, so the app and the proofs agree.
+ * Configured durations, countdowns and plans use {@link formatDuration} instead.
+ */
+export function formatElapsed(seconds: number): string {
+  const s = Math.max(0, Math.round(seconds));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const rest = s % 60;
+  const secs = rest ? ` ${rest} s` : "";
+  if (h) return `${h} h ${m} min${secs}`;
+  if (m) return `${m} min${secs}`;
+  return `${rest} s`;
+}
+
 /** "+6 min" style offsets for plans. */
 export const formatOffset = (seconds: number) => (seconds <= 0 ? "now" : `+${formatDuration(seconds)}`);
 

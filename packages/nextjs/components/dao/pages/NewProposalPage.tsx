@@ -22,7 +22,7 @@ import {
   isBaseDraft,
   validateDraft,
 } from "~~/lib/dao/proposal";
-import { formatDuration, formatOffset } from "~~/lib/dao/time";
+import { formatDuration, formatElapsed, formatOffset } from "~~/lib/dao/time";
 import type { DaoOverview } from "~~/lib/dao/types";
 import {
   ETH_DECIMALS,
@@ -364,7 +364,7 @@ export function NewProposalPage() {
           what: "Runs on Base Sepolia",
           detail:
             delivery !== null
-              ? `Hedera to Base has taken ${formatDuration(delivery)} lately (median of this DAO’s recent receipts).`
+              ? `Hedera to Base has taken ${formatElapsed(delivery)} lately (median of this DAO’s recent receipts).`
               : "No delivery from this DAO has been measured yet.",
         },
         {

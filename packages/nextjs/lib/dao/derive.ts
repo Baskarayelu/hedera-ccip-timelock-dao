@@ -7,7 +7,7 @@ import {
   hederaValueTotal,
   splitDescription,
 } from "./proposal";
-import { formatClock, formatDuration, formatWhen, median } from "./time";
+import { formatClock, formatDuration, formatElapsed, formatWhen, median } from "./time";
 import {
   AutoAction,
   type CrossChainRecord,
@@ -230,13 +230,13 @@ export function receiptEta(stats: NetworkStats | null): number | null {
 
 export function finalityText(stats: NetworkStats | null): string {
   if (stats?.baseFinalityLag == null) return "Base Sepolia finality could not be read right now.";
-  return `Base Sepolia finality is ${formatDuration(stats.baseFinalityLag)} behind right now (live).`;
+  return `Base Sepolia finality is ${formatElapsed(stats.baseFinalityLag)} behind right now (live).`;
 }
 
 export function deliveryText(stats: NetworkStats | null): string {
   const d = deliveryEstimate(stats);
   if (d === null) return "No delivery from this DAO has been measured yet.";
-  return `Hedera to Base has taken ${formatDuration(d)} lately (median of this DAO’s recent receipts).`;
+  return `Hedera to Base has taken ${formatElapsed(d)} lately (median of this DAO’s recent receipts).`;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -767,7 +767,7 @@ export function deriveProposal(p: ProposalRecord, ctx: DeriveContext): ProposalV
       const fee = ctx.liveFee;
       banner = {
         tone: "warn",
-        title: "Waiting: the CCIP fee is above the cap you voted for",
+        title: "Waiting: the CCIP fee is above the cap this proposal was voted with",
         body:
           fee == null
             ? `This proposal allows at most ${formatHbar(cap)}. Anyone can execute it once the fee drops.`
@@ -844,7 +844,7 @@ export function deriveProposal(p: ProposalRecord, ctx: DeriveContext): ProposalV
       banner = {
         tone: "ok",
         title: `Done: executed on Base Sepolia, receipt received on Hedera at ${formatWhen(receipt.tx.timestamp, now)}`,
-        body: `The calls succeeded from the DAO’s account. The receipt took ${formatDuration(
+        body: `The calls succeeded from the DAO’s account. The receipt took ${formatElapsed(
           receipt.tx.timestamp - receipt.executedAt,
         )} after execution, mostly waiting for Base Sepolia finality.`,
       };

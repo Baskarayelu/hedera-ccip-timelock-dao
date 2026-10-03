@@ -131,6 +131,8 @@ On the proposal's page, *Execute now* from a funded wallet then showed "the CCIP
 
 ## What the runs measured
 
+Times are rounded to the nearest second, the rule the app uses when it shows a measured time.
+
 | | Proposal 3 | Proposal 4 | Proposal 7 |
 |---|---|---|---|
 | Voting ended → queued by the network | 5 s | 5 s | 5 s |

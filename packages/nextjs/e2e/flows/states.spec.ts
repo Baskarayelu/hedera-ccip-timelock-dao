@@ -150,7 +150,7 @@ const PAGES: { name: string; scenario: string; path?: string; detail?: boolean; 
     scenario: "feeAboveCap",
     detail: true,
     check: async page => {
-      await banner("Waiting: the CCIP fee is above the cap you voted for")(page);
+      await banner("Waiting: the CCIP fee is above the cap this proposal was voted with")(page);
       await expect(page.getByRole("button", { name: "Execute now" })).toBeEnabled();
     },
   },

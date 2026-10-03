@@ -7,7 +7,7 @@ import { SCENARIOS, T0 } from "~~/lib/dao/fixtures/scenarios";
 import { revertDataOf } from "~~/lib/dao/live/source";
 import { buildProposal, ccipMessage, describeActions, encodeRequest } from "~~/lib/dao/proposal";
 import { timelockOperationId, timelockSalt } from "~~/lib/dao/source";
-import { formatDuration } from "~~/lib/dao/time";
+import { formatDuration, formatElapsed } from "~~/lib/dao/time";
 import { formatUnitsFixed, parseAmount } from "~~/lib/dao/units";
 
 /** Every detail scenario must derive the phase its name promises. */
@@ -151,6 +151,13 @@ test("units and durations", () => {
   expect(formatUnitsFixed(123_456_789n, 8)).toBe("1.23");
   expect(formatDuration(72)).toBe("1 min 12 s");
   expect(formatDuration(1354)).toBe("22 min");
+  // Measured elapsed times round to the nearest second, as PROOFS.md states them.
+  expect(formatElapsed(1157.75)).toBe("19 min 18 s");
+  expect(formatElapsed(1332.96)).toBe("22 min 13 s");
+  expect(formatElapsed(1434.246)).toBe("23 min 54 s");
+  expect(formatElapsed(35.4)).toBe("35 s");
+  expect(formatElapsed(1380)).toBe("23 min");
+  expect(formatElapsed(3725)).toBe("1 h 2 min 5 s");
 });
 
 test("a revert the governor's ABI does not know is still found and decoded before sending", () => {
