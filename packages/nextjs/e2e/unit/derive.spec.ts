@@ -74,6 +74,15 @@ test("fee above cap names both amounts and keeps Execute now enabled", async () 
   expect(view.fallback?.rearm.enabled).toBe(false);
 });
 
+test("fee above cap offers no scheduled retry until a live quote arrives", async () => {
+  const world = SCENARIOS.feeAboveCap();
+  const [overview, stats, records] = await Promise.all([world.overview(), world.network(), world.proposals()]);
+  const record = records[records.length - 1];
+  const ctx = { now: world.now(), overview, stats, addresses: world.addresses };
+  expect(deriveProposal(record, { ...ctx, liveFee: undefined }).fallback?.rearm.enabled).toBe(false);
+  expect(deriveProposal(record, { ...ctx, liveFee: 150_000_000n }).fallback?.rearm.enabled).toBe(true);
+});
+
 test("a short treasury explains the shortfall", async () => {
   const view = await focusView("executionFailed");
   expect(view.banner.body).toContain("the treasury holds 0.40 HBAR");

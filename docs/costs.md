@@ -73,14 +73,14 @@ For a proposal with one action on Base Sepolia:
 |---|---|---:|
 | Float | Queue callback | 1.34 |
 | Float | Execute callback, including the CCIP send | 0.39 |
-| Treasury | CCIP fee to Base Sepolia, quoted at execution | 1.14–1.17 measured |
-| The DAO's account on Base | Receipt back to Hedera | 0.000058–0.000059 ETH (proposal 3's receipt, paid by the DAO's account: [Base tx](https://sepolia.basescan.org/tx/0x68d095ac6568d6c08ebfecae780cb76229e68154ca1b7591d1524a766e637886)) |
+| Treasury | CCIP fee to Base Sepolia, quoted at execution | 1.14–1.19 measured |
+| The DAO's account on Base | Receipt back to Hedera | 0.000058–0.000060 ETH (proposal 3's receipt, paid by the DAO's account: [Base tx](https://sepolia.basescan.org/tx/0x68d095ac6568d6c08ebfecae780cb76229e68154ca1b7591d1524a766e637886)) |
 
 A Hedera-only proposal costs the float 1.33 + 0.09 HBAR and no CCIP fee. A callback refused for a short float costs it 0.0272 HBAR. The executor on Base pays the receipt from the DAO's account when it holds enough ETH, otherwise from its sponsor pool (ten receipts per DAO).
 
 ## Measured again on the official DAO
 
-The DAO in [PROOFS.md](../PROOFS.md) runs with the default limits (3,000,000 and 1,500,000). Its callbacks used the same gas as the test DAO's, and each was billed exactly gas used × 81 tinybar, the price that day:
+The DAO in [PROOFS.md](../PROOFS.md) runs with the default limits (3,000,000 and 1,500,000). Its callbacks used the same gas as the test DAO's, and each was billed exactly gas used × the network price that day (81 tinybar on 2 October, 84 on 3 October):
 
 | Proposal | Queue callback | Execute callback | CCIP fee (treasury) | Receipt fee (DAO's Base account) |
 |---|---:|---:|---:|---:|
@@ -88,6 +88,7 @@ The DAO in [PROOFS.md](../PROOFS.md) runs with the default limits (3,000,000 and
 | 2. Fee cap below the quote | 1,609,952 gas | 200,018 gas, stopped by `FeeAboveCap` | not charged | none |
 | 3. Parameter on Base | 1,609,844 gas | 465,700 gas | 1.138 HBAR | 0.0000579 ETH |
 | 4. 5 USDC payout on Base | 1,609,928 gas | 465,784 gas | 1.139 HBAR | 0.0000587 ETH |
+| 7. 4 USDC payout on Base (filmed for the demo) | 1,612,626 gas | 468,482 gas | 1.186 HBAR | 0.0000597 ETH |
 
 Its deployment cost 21.73 HBAR in gas and fees, plus the 35 HBAR of default float and treasury funding (and 0.02 HBAR for the admin renounce that had to be repeated, see [PROOFS.md](../PROOFS.md#deployment)).
 
