@@ -39,6 +39,7 @@
             { "label": "Create a deployer key", "command": "{run:foundry:account:generate}" },
             { "label": "Deploy to Hedera testnet", "command": "{run:foundry:deploy:hedera}" },
             { "label": "Point the app at it", "command": "{run:foundry:export}" },
+            { "label": "Publish the source on Sourcify", "command": "{run:foundry:verify:hedera}" },
             { "text": "README.md walks through every step, the costs in HBAR and what to do when the network's call fails." }
           ]
         }

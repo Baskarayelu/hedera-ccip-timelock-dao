@@ -16,7 +16,7 @@ Everything below happened on Hedera testnet and Base Sepolia through this reposi
 | The DAO's account on Base Sepolia (a minimal clone of `DaoAccount`) | [0xa0E81699e1BC4f571d90A941b01420796192B124](https://sepolia.basescan.org/address/0xa0E81699e1BC4f571d90A941b01420796192B124) · source: [Blockscout](https://base-sepolia.blockscout.com/address/0xa0E81699e1BC4f571d90A941b01420796192B124), [Sourcify](https://repo.sourcify.dev/84532/0x9Bca21242bE1A189450f92BC064F2AA230D2c68F) |
 | Shared `CrossChainExecutor` on Base Sepolia | [0x9b7691b0766a55d8509b07cb633ce281fee2a632](https://sepolia.basescan.org/address/0x9b7691b0766a55d8509b07cb633ce281fee2a632) · source: [Blockscout](https://base-sepolia.blockscout.com/address/0x9B7691B0766A55D8509b07Cb633Ce281feE2A632), [Sourcify](https://repo.sourcify.dev/84532/0x9B7691B0766A55D8509b07Cb633Ce281feE2A632) |
 
-Settings: 1 minute voting delay, 5 minute vote, 2 minute timelock, 4% quorum; callback gas limits 3,000,000 (queue) and 1,500,000 (execute).
+Settings: 1 minute voting delay, 5 minute vote, 2 minute timelock (counted on Hedera's block clock, so the app's clock times can show about 2 s less), 4% quorum; callback gas limits 3,000,000 (queue) and 1,500,000 (execute).
 
 ### Deployment
 

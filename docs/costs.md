@@ -1,6 +1,6 @@
 # Costs
 
-What each step costs on Hedera testnet, measured from mirror-node records in October 2026. HBAR figures use 83 tinybar per gas, the price the network billed while these were measured (it moves with the HBAR/USD rate; it was 81–83 over the measurements). Gas figures do not move.
+What each step costs on Hedera testnet, measured from mirror-node records in October 2026. HBAR figures use 83 tinybar per gas, the price the network billed while these were measured (it moves with the HBAR/USD rate; it was 81–84 over the measurements). Gas figures do not move.
 
 ## How Hedera bills gas
 
@@ -63,7 +63,7 @@ Every callback measured, each run once by the network with no keeper:
 | *Schedule it again* | 1,495,029 | 1.24 |
 | *Execute now* (an HBAR transfer and one Base action) | 465,311 | 0.39, plus the CCIP fee from the treasury |
 
-Setting up and taking part once (claim, approve, wrap, delegate, propose, vote) spends about 2.8 HBAR, or 3.4 with an association. On the official DAO, voter A's setup, one proposal and its vote cost 2.72–2.73 HBAR ([PROOFS.md](../PROOFS.md#voting-power)). The relay also wants each transaction's `gasLimit × eth_gasPrice` on hand when it is sent; for a proposal that is about 2.1 HBAR. The New proposal page's "You pay to propose" shows the relay's gas estimate at `eth_gasPrice`, about 10–15% above what is then billed (for example ≈ 1.42 HBAR shown, 1.23–1.24 billed). **About 10 HBAR covers every step** with room to spare.
+Setting up and taking part once (claim, approve, wrap, delegate, propose, vote) spends about 2.8 HBAR, or 3.4 with an association. On the official DAO, voter A's setup, one proposal and its vote cost 2.72–2.73 HBAR ([PROOFS.md](../PROOFS.md#voting-power)). The relay also wants each transaction's `gasLimit × eth_gasPrice` on hand when it is sent; for a proposal that is about 2.1 HBAR. The New proposal page's "You pay to propose" shows the relay's gas estimate at `eth_gasPrice`, about 15% above what is then billed (for example ≈ 1.42 HBAR shown, 1.23–1.24 billed). **About 10 HBAR covers every step** with room to spare.
 
 ## What a proposal costs the DAO
 
