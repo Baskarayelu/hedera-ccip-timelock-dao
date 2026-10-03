@@ -259,6 +259,9 @@ export function NewProposalPage() {
   const overview = useOverview();
   const stats = useNetworkStats();
   const voter = useVoter();
+  // The page is server-rendered; its buttons only work once React has hydrated it.
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [actions, setActions] = useState<DraftAction[]>([]);
@@ -439,7 +442,7 @@ export function NewProposalPage() {
                     On Hedera
                   </span>
                   {HEDERA_KINDS.map(kind => (
-                    <button key={kind} type="button" className="dbtn" onClick={() => add(kind)}>
+                    <button key={kind} type="button" className="dbtn" disabled={!hydrated} onClick={() => add(kind)}>
                       {DRAFT_LABELS[kind]}
                     </button>
                   ))}
@@ -449,7 +452,7 @@ export function NewProposalPage() {
                     On Base Sepolia, over Chainlink CCIP
                   </span>
                   {BASE_KINDS.map(kind => (
-                    <button key={kind} type="button" className="dbtn" onClick={() => add(kind)}>
+                    <button key={kind} type="button" className="dbtn" disabled={!hydrated} onClick={() => add(kind)}>
                       {DRAFT_LABELS[kind]}
                     </button>
                   ))}

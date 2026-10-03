@@ -552,6 +552,10 @@ export function createLiveSource(dep: HederaDeployment | null, getWallet: () => 
     const wallet = getWallet();
     if (!wallet) throw new Error("Connect a wallet first.");
     const plan = planTx(tx, from, need().addresses);
+    // Without an account the relay cannot simulate anything, so the check below would see no reason to stop.
+    if (!(await mirror.account(from))) {
+      throw new Error("This wallet has no Hedera account yet. Send it testnet HBAR from the faucet first.");
+    }
     const { gas, revert } = await plannedGas(tx, from);
     // A revert our contracts explain would happen on-chain too: say why instead of spending the gas.
     if (revert && decodeRevert(revert).name) {
