@@ -52,7 +52,7 @@ npm run next:dev
 
 The CLI asks whether to add the Hedera Skills agent guides (either answer works) and which network to use: choose **Testnet**. It installs the dependencies itself. Any deprecation warning printed while the CLI itself downloads (for example for `tar`) comes from its own dependencies and is harmless. To skip the questions, as CI and coding agents must, add `--yes --skip-hedera-skills --network testnet` after the template.
 
-Open http://localhost:3000 (if that port is taken, Next.js uses the next free one and prints it). The app opens the live testnet DAO; its proposals load in the browser.
+Open http://localhost:3000 (if that port is taken, Next.js uses the next free one and prints it). The first page can take a minute or two to compile; later ones load in seconds. The app opens the live testnet DAO; its proposals load in the browser.
 
 To use npm's `create` command instead, write `create scaffold-hbar@latest my-dao -- --template Baskarayelu/hedera-ccip-timelock-dao` after `npm`: the `--` passes the flags through to the CLI. The non-interactive flags go at the end, after the template: `… -- --template Baskarayelu/hedera-ccip-timelock-dao --yes --skip-hedera-skills --network testnet`.
 

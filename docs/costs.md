@@ -74,7 +74,7 @@ For a proposal with one action on Base Sepolia:
 | Float | Queue callback | 1.34 |
 | Float | Execute callback, including the CCIP send | 0.39 |
 | Treasury | CCIP fee to Base Sepolia, quoted at execution | 1.14–1.17 measured |
-| The DAO's account on Base | Receipt back to Hedera | 0.000058–0.000059 ETH ([ReceiptSent](https://sepolia.basescan.org/tx/0xf71f51a3004a236b302da643b780033ecea278cd9eeb658518e4c72dcff14e66)) |
+| The DAO's account on Base | Receipt back to Hedera | 0.000058–0.000059 ETH (proposal 3's receipt, paid by the DAO's account: [Base tx](https://sepolia.basescan.org/tx/0x68d095ac6568d6c08ebfecae780cb76229e68154ca1b7591d1524a766e637886)) |
 
 A Hedera-only proposal costs the float 1.33 + 0.09 HBAR and no CCIP fee. A callback refused for a short float costs it 0.0272 HBAR. The executor on Base pays the receipt from the DAO's account when it holds enough ETH, otherwise from its sponsor pool (ten receipts per DAO).
 
