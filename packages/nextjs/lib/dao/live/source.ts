@@ -47,14 +47,15 @@ import { baseSepolia } from "viem/chains";
 import type { CcipMessageStatus } from "~~/app/api/ccip/[messageId]/route";
 import { hederaTestnet } from "~~/scaffold.config";
 
+// A stalled public RPC call gives up after 15 s and one retry, so a page never waits minutes on it.
 const hedera = createPublicClient({
   chain: hederaTestnet,
-  transport: http(HEDERA_RPC_URL, { timeout: 30_000 }),
+  transport: http(HEDERA_RPC_URL, { timeout: 15_000, retryCount: 1 }),
   batch: { multicall: true },
 });
 const base = createPublicClient({
   chain: baseSepolia,
-  transport: http(BASE_RPC_URL, { timeout: 30_000 }),
+  transport: http(BASE_RPC_URL, { timeout: 15_000, retryCount: 1 }),
   batch: { multicall: true },
 });
 

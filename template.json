@@ -29,7 +29,7 @@
           "title": "Try the live testnet DAO",
           "steps": [
             { "label": "Start the app", "command": "{run:next:dev}" },
-            { "text": "Open http://localhost:3000, connect a Hedera testnet wallet, then claim, wrap and delegate on the Voting power page." },
+            { "text": "Open http://localhost:3000, connect a Hedera testnet wallet, then claim, approve and wrap, and delegate on the Voting power page." },
             { "label": "Testnet HBAR", "url": "https://portal.hedera.com/faucet" }
           ]
         },

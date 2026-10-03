@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { execFileSync } from "child_process";
 
 /**
  * Two projects:
@@ -16,6 +17,16 @@ const PORT = Number(process.env.E2E_PORT ?? 3100);
 const unitOnly = process.argv.some(
   (arg, i, all) => arg === "--project=unit" || (arg === "--project" && all[i + 1] === "unit"),
 );
+
+// Check the port before Playwright probes it: if any server already answers there, Playwright's own error does
+// not mention E2E_PORT. Only the main process checks; workers load this file while the server is running.
+if (!unitOnly && process.env.TEST_WORKER_INDEX === undefined) {
+  try {
+    execFileSync("node", [`${__dirname}/e2e/check-port.cjs`, String(PORT)], { stdio: "inherit" });
+  } catch {
+    process.exit(1);
+  }
+}
 
 export default defineConfig({
   testDir: "./e2e",
@@ -41,7 +52,7 @@ export default defineConfig({
   webServer: unitOnly
     ? undefined
     : {
-        command: `node e2e/check-port.cjs ${PORT} && npx next build && node e2e/restore-next-env.cjs && npx next start --port ${PORT}`,
+        command: `npx next build && node e2e/restore-next-env.cjs && npx next start --port ${PORT}`,
         url: `http://localhost:${PORT}/api/health`,
         // Always start our own fixture build: a server already on the port may be another app or a live build.
         reuseExistingServer: false,

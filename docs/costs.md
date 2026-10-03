@@ -80,7 +80,7 @@ A Hedera-only proposal costs the float 1.33 + 0.09 HBAR and no CCIP fee. A callb
 
 ## Measured again on the official DAO
 
-The DAO in [PROOFS.md](../PROOFS.md) runs with the default limits (3,000,000 and 1,500,000). Its callbacks used the same gas as the test DAO's, and each was billed exactly gas used × the network price that day (81 tinybar on 2 October, 84 on 3 October):
+The DAO in [PROOFS.md](../PROOFS.md) runs with the default limits (3,000,000 and 1,500,000). Its callbacks used the same gas as the test DAO's, and each was billed exactly gas used × the network price that day (81 tinybar on 2 October, 83–84 on 3 October):
 
 | Proposal | Queue callback | Execute callback | CCIP fee (treasury) | Receipt fee (DAO's Base account) |
 |---|---:|---:|---:|---:|

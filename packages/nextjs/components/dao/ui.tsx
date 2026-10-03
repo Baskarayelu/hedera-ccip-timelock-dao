@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import type { Banner as BannerView, Chip as ChipName, Tone } from "~~/lib/dao/derive";
 import type { TextPart } from "~~/lib/dao/proposal";
 
@@ -84,8 +84,25 @@ export function LoadState({ error, label }: { error: unknown; label: string }) {
       />
     );
   }
+  return <Loading label={label} />;
+}
+
+/** After 15 s of loading, say so: a public testnet service is slow and the page is still retrying. */
+const SLOW_MS = 15_000;
+
+function Loading({ label }: { label: string }) {
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setSlow(true), SLOW_MS);
+    return () => clearTimeout(timer);
+  }, []);
   return (
     <div className="vstack-lg" aria-busy="true" aria-label={`Loading ${label}`}>
+      {slow && (
+        <p className="small muted" data-testid="still-loading" style={{ margin: 0 }}>
+          Still loading {label}: a testnet service is slow to answer, and the page keeps retrying.
+        </p>
+      )}
       <div className="ghost" />
       <div className="ghost" />
     </div>
