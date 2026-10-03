@@ -545,7 +545,7 @@ export function NewProposalPage() {
             <div className="rule-top">
               <div className="kv">
                 <span className="muted">Your voting power</span>
-                <span className="mono">{voter.data ? `${formatVotes(voter.data.votes)} ${VOTE_SYMBOL}` : "—"}</span>
+                <span className="mono">{voter.data ? `${formatGov(voter.data.votes)} ${VOTE_SYMBOL}` : "—"}</span>
               </div>
               <div className="kv">
                 <span className="muted">You pay to propose</span>

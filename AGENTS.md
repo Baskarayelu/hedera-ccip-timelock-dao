@@ -32,7 +32,7 @@ Run them from the repository root.
 npm install
 npm run test                        # Foundry tests and the frontend's data-layer unit tests
 npm run next:test:e2e               # every page and state in Chromium (npx playwright install chromium once)
-npm run lint                        # Prettier, forge fmt, forge lint (needs Foundry 1.8.4+)
+npm run lint                        # ESLint, Prettier, forge fmt, forge lint (needs Foundry 1.8.4+), docs check
 npm run build                       # forge compile + next build
 npm run next:dev                    # http://localhost:3000
 

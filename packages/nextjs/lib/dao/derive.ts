@@ -617,15 +617,17 @@ function fallbackView(
     // and cost HBAR for nothing; Execute now stays available because it is checked before anything is sent.
     const cap = crossChainBundle(p, ctx.addresses.timelock)?.feeCap ?? 0n;
     const stillHigh = ctx.liveFee == null || ctx.liveFee > cap;
+    const [fee, max] = outcome.revertArgs as readonly bigint[];
+    const amounts = fee !== undefined && max !== undefined ? ` (fee ${formatHbar(fee)}, cap ${formatHbar(max)})` : "";
     return {
       emphasis: "warn",
       title: "Execution is waiting on the fee",
       body:
         ctx.liveFee == null
-          ? `The network’s call at ${formatWhen(outcome.at, now)} stopped with ${outcome.signature}. Execute it once the fee is within the cap; a scheduled retry is offered when the live quote shows it is.`
+          ? `The network’s call at ${formatWhen(outcome.at, now)} stopped with ${outcome.signature} ${amounts}. Execute it once the fee is within the cap; a scheduled retry is offered when the live quote shows it is.`
           : stillHigh
-            ? `The network’s call at ${formatWhen(outcome.at, now)} stopped with ${outcome.signature}. The fee is still above the cap, so a retry would stop the same way: execute it once the fee drops.`
-            : `The network’s call at ${formatWhen(outcome.at, now)} stopped with ${outcome.signature}. Execute now, or schedule the network to try again.`,
+            ? `The network’s call at ${formatWhen(outcome.at, now)} stopped with ${outcome.signature} ${amounts}. The fee is still above the cap, so a retry would stop the same way: execute it once the fee drops.`
+            : `The network’s call at ${formatWhen(outcome.at, now)} stopped with ${outcome.signature} ${amounts}. Execute now, or schedule the network to try again.`,
       rearm: { enabled: !stillHigh && armedAt(AutoAction.Execute) < now, action: AutoAction.Execute },
       primary: { enabled: true, kind: "execute", label: "Execute now" },
     };

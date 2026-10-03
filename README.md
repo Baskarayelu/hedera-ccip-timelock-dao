@@ -26,7 +26,7 @@ A DAO made from this template runs on Hedera testnet. **[Live demo](https://hede
 
 | Base Sepolia | Address | Source |
 |---|---|---|
-| The DAO's account (a minimal clone of `DaoAccount`) | [0xa0E81699e1BC4f571d90A941b01420796192B124](https://sepolia.basescan.org/address/0xa0E81699e1BC4f571d90A941b01420796192B124) | [Sourcify](https://repo.sourcify.dev/84532/0x9Bca21242bE1A189450f92BC064F2AA230D2c68F) (implementation) · [Blockscout](https://base-sepolia.blockscout.com/address/0xa0E81699e1BC4f571d90A941b01420796192B124) |
+| The DAO's account (a minimal clone of `DaoAccount`) | [0xa0E81699e1BC4f571d90A941b01420796192B124](https://sepolia.basescan.org/address/0xa0E81699e1BC4f571d90A941b01420796192B124) | [Sourcify](https://repo.sourcify.dev/84532/0x9Bca21242bE1A189450f92BC064F2AA230D2c68F) (implementation) · [Blockscout](https://base-sepolia.blockscout.com/address/0xa0E81699e1BC4f571d90A941b01420796192B124) (proxy; its implementation's source) |
 | `CrossChainExecutor`, shared by every DAO from this template | [0x9B7691B0766A55D8509b07Cb633Ce281feE2A632](https://sepolia.basescan.org/address/0x9B7691B0766A55D8509b07Cb633Ce281feE2A632) | [Sourcify](https://repo.sourcify.dev/84532/0x9B7691B0766A55D8509b07Cb633Ce281feE2A632) · [Blockscout](https://base-sepolia.blockscout.com/address/0x9B7691B0766A55D8509b07Cb633Ce281feE2A632) |
 | `RemoteParameters`, shared demo target | [0x5f8b11a830ce09d87fA586c95e7C85FA57691cd9](https://sepolia.basescan.org/address/0x5f8b11a830ce09d87fA586c95e7C85FA57691cd9) | [Sourcify](https://repo.sourcify.dev/84532/0x5f8b11a830ce09d87fA586c95e7C85FA57691cd9) · [Blockscout](https://base-sepolia.blockscout.com/address/0x5f8b11a830ce09d87fA586c95e7C85FA57691cd9) |
 
@@ -52,7 +52,7 @@ npm run next:dev
 
 The CLI asks whether to add the Hedera Skills agent guides (either answer works) and which network to use: choose **Testnet**. It installs the dependencies itself. Any deprecation warning printed while the CLI itself downloads (for example for `tar`) comes from its own dependencies and is harmless. To skip the questions, as CI and coding agents must, add `--yes --skip-hedera-skills --network testnet` after the template.
 
-Open http://localhost:3000 (if that port is taken, Next.js uses the next free one and prints it). The first page can take a minute or two to compile; later ones load in seconds. The app opens the live testnet DAO; its proposals load in the browser.
+Open http://localhost:3000 (if that port is taken, Next.js uses the next free one and prints it). Each page compiles on its first visit, the first one for up to a minute or two; after that, pages load in seconds. The app opens the live testnet DAO; its proposals load in the browser.
 
 To use npm's `create` command instead, write `create scaffold-hbar@latest my-dao -- --template Baskarayelu/hedera-ccip-timelock-dao` after `npm`: the `--` passes the flags through to the CLI. The non-interactive flags go at the end, after the template: `… -- --template Baskarayelu/hedera-ccip-timelock-dao --yes --skip-hedera-skills --network testnet`.
 
