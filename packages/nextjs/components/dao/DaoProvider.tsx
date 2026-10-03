@@ -119,7 +119,7 @@ export function DaoProvider({ children }: { children: ReactNode }) {
         return null;
       }
       setPending(p => new Set(p).add(label));
-      const id = toast.loading(`${label}: confirm in your wallet…`);
+      const id = toast.loading(`${label}: checking, then confirm in your wallet…`);
       try {
         const result = await source.send(tx, wallet.address);
         const link = source.kind === "live" ? explorer.hederaTx(result.hash) : null;

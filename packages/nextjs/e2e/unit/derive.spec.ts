@@ -70,6 +70,8 @@ test("fee above cap names both amounts and keeps Execute now enabled", async () 
   expect(view.banner.body).toContain("2.00 HBAR");
   expect(view.fallback?.primary).toEqual({ enabled: true, kind: "execute", label: "Execute now" });
   expect(view.fallback?.body).toContain("FeeAboveCap(231000000, 200000000)");
+  // A scheduled retry would stop the same way while the quote stays above the cap.
+  expect(view.fallback?.rearm.enabled).toBe(false);
 });
 
 test("a short treasury explains the shortfall", async () => {

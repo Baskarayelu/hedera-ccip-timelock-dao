@@ -7,7 +7,7 @@ What each step costs on Hedera testnet, measured from mirror-node records in Oct
 **A transaction, and a scheduled call, is billed for the gas it used. The gas limit is never billed, but it has to be covered by a balance.**
 
 - The JSON-RPC relay refuses a transaction unless the sender holds `gasLimit × eth_gasPrice`. `eth_gasPrice` quotes about 5% above the price the network bills (86–87 against 82–83 tinybar per gas).
-- A scheduled call fails with `INSUFFICIENT_PAYER_BALANCE` unless its payer holds `gasLimit × gas price` when it fires. The network still charges a small fixed fee for that failed attempt, and the schedule is consumed: it never retries.
+- A scheduled call fails with `INSUFFICIENT_PAYER_BALANCE` unless its payer holds `gasLimit × gas price` when it fires. The schedule is consumed and never retries; the payer is charged nothing if it holds nothing, or a small fixed fee (0.027 HBAR measured) if it holds some HBAR.
 - When the call runs, the payer is charged `gasUsed × gas price`, exactly.
 
 Measured on a test DAO deployed with a 12,000,000 gas limit for its queue callback and a 5 HBAR float:

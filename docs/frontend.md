@@ -40,6 +40,8 @@ Each proposal's state comes from `lib/dao/derive.ts`, which reads raw records: t
 
 The Voting power page has its own states: HGOV not associated (and no free automatic-association slot), association not needed, faucet claimed within its cooldown (the next claim time is read from the contract), wrapped but not delegated, and no Hedera account yet. Every page handles no wallet, the wrong network (with a switch button), and no DAO deployed yet.
 
+**Console noise you can ignore.** In development the browser console shows "Lit is in dev mode" (from the wallet modal's components), and the deployed build sometimes warns that a preloaded CSS file was not used within a few seconds (a Next.js resource hint). Neither affects the app.
+
 ## Where the numbers come from
 
 | Shown | Source |

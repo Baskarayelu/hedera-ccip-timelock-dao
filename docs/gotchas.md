@@ -12,7 +12,7 @@ Behaviour this template depends on, measured on Hedera testnet (services 0.77.2)
 
 **A busy second costs as much as a successful schedule.** Each second holds about 15M gas of scheduled calls. Filling one second and scheduling into it again returned 370 (`SCHEDULE_EXPIRY_IS_BUSY`), and both transactions used exactly 1,436,980 gas ([22](https://hashscan.io/testnet/transaction/0x927993a3b5b5be9185a3e121d35970ce1473015a7419297bd592d18da3cca91e), [370](https://hashscan.io/testnet/transaction/0x8722ad017f736b001199f321a0ca6f4c7419e3c2d4f38619178d5d60c708069e)). Probe `hasScheduleCapacity` inside the transaction first. The relay's `eth_call` of that view is simulated by the mirror node and ignores throttles (it even returns true for a gas amount of 2²⁵⁶−1), so it cannot be trusted off-chain.
 
-**An unfunded payer loses the schedule silently.** When the call fires, the payer must hold `gasLimit × gas price`. If it does not, the network records `INSUFFICIENT_PAYER_BALANCE`, charges nothing, emits nothing and does not retry ([schedule 0.0.10813682](https://hashscan.io/testnet/schedule/0.0.10813682) ran at 1790882411.10 with that result). Keep the paying contract funded and keep a manual path.
+**An unfunded payer loses the schedule silently.** When the call fires, the payer must hold `gasLimit × gas price`. If it does not, the network records `INSUFFICIENT_PAYER_BALANCE`, emits nothing and does not retry. The payer was charged nothing when it held nothing ([schedule 0.0.10813682](https://hashscan.io/testnet/schedule/0.0.10813682), 1790882411.10), and a small fixed fee (0.027 HBAR) when it held some HBAR but less than the limit needs ([schedule 0.0.10816222](https://hashscan.io/testnet/schedule/0.0.10816222)). Keep the paying contract funded and keep a manual path.
 
 **Never send `msg.value` to 0x16b.** The call fails with `INVALID_CONTRACT_ID` and burns all its gas. The `value` argument of `scheduleCall` is in tinybar and is taken from the payer when the call runs.
 
@@ -56,10 +56,10 @@ Behaviour this template depends on, measured on Hedera testnet (services 0.77.2)
 
 **With npm, the CLI rewrites text files:** other package managers' commands become commands for npm, and every "npm" followed by a word becomes "npm run" plus that word, except for run, install, exec and ci. `scripts/check-docs.mjs` (part of `npm run lint`) and the template gate in CI keep this repository's files safe from that rewrite.
 
-**The CLI needs a Git identity** (`git config user.name` and `user.email`) in the directory where it runs, for its initial commit. It checks before that directory is a repository, so an identity Git applies only inside some repositories (an `includeIf` rule) is not seen; set a global one.
+**The CLI needs a Git identity** (`git config user.name` and `user.email`) in the directory where it runs, for its initial commit. It checks before that directory is a repository, so an identity Git applies only inside some repositories (an `includeIf` rule) is not seen. Set a global one, or run the CLI inside a repository where the rule applies (`mkdir work && cd work && git init`), as the README describes.
 
 **The CLI installs with `npm install --legacy-peer-deps`**, which drops packages that only arrive as peer dependencies. `ws` did: `isows` (used by viem's WebSocket transport, which RainbowKit imports) needs it at the top of `node_modules`, and without it every page failed to compile in a freshly scaffolded project. `ws` is therefore a direct dependency in the root `package.json`, and the template gate scaffolds through the CLI's own install so a gap like this fails in CI.
 
 ## Foundry
 
-**Foundry 1.8.4 or later.** `foundry.toml` configures lint rules by IDs that older versions reject (`Unknown lint ID: block-timestamp`). Install the latest stable with `foundryup`, or exactly this version with `foundryup --install 1.8.4`.
+**Foundry 1.8.4 or later for linting.** Any version from 1.4 builds, tests and deploys, but `foundry.toml` configures lint rules by IDs that older versions reject (`Unknown lint ID: block-timestamp`), so `npm run lint` needs 1.8.4. Install the latest stable with `foundryup`, or exactly this version with `foundryup --install 1.8.4`.

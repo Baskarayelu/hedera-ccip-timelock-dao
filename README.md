@@ -104,7 +104,7 @@ A scheduled call runs once. If it fails, the proposal's page says why (for examp
 - **Schedule it again** asks the network to try once more. Your wallet pays to schedule it; the float pays for the run.
 - **Queue now** or **Execute now** does the step straight from your wallet.
 
-Before sending either, the app checks that the transaction would succeed; if a reason the DAO's contracts define would stop it, the page shows that reason and sends nothing. The Proposals page warns when the float is too low for the next call, and anyone can top it up by sending HBAR to the governor. [Costs](docs/costs.md#callback-gas-limits) explains what the float must hold.
+Before sending either, the app estimates the transaction: if it would revert with a reason the DAO's contracts define (such as `FeeAboveCap`), the page shows that reason and sends nothing, and a wallet with no Hedera account yet is asked to fund it first. While a proposal's fee is still above its cap, *Schedule it again* is unavailable, because the retry would stop the same way. The Proposals page warns when the float is too low for the next call, and anyone can top it up by sending HBAR to the governor. [Costs](docs/costs.md#callback-gas-limits) explains what the float must hold.
 
 ## Project layout
 

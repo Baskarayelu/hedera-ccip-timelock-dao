@@ -81,7 +81,7 @@ Voter A proposed all four proposals; both voted For on each. Voter A's four setu
 | The network queued it | [schedule 0.0.10823129](https://hashscan.io/testnet/schedule/0.0.10823129) |
 | The network's execution stopped: `AutoActionFailed` carrying `FeeAboveCap(113801892, 50000000)`. Nothing left the treasury and the proposal stays queued. | [schedule 0.0.10823188](https://hashscan.io/testnet/schedule/0.0.10823188) |
 
-On the proposal's page, *Execute now* then showed "the CCIP fee was 1.13 HBAR, above the 0.50 HBAR cap this proposal allows" (the app cuts HBAR amounts to two decimals) and sent nothing: the app estimates every transaction first and refuses one that would revert with a reason the DAO's contracts define.
+On the proposal's page, *Execute now* from a funded wallet then showed "the CCIP fee was 1.13 HBAR, above the 0.50 HBAR cap this proposal allows" (the app cuts HBAR amounts to two decimals) and sent nothing: the app estimates every transaction first and refuses one that would revert with a reason the DAO's contracts define. (A wallet with no Hedera account yet is asked to fund it first: the relay cannot simulate a transaction for it.)
 
 ## Proposal 3: a parameter on Base Sepolia
 

@@ -613,11 +613,17 @@ function fallbackView(
     };
   }
   if (phase === "feeAboveCap" && outcome?.kind === "failed") {
+    // While the live quote is still above the cap, a scheduled retry would stop the same way and cost HBAR for
+    // nothing; Execute now stays available because it is checked before anything is sent.
+    const cap = crossChainBundle(p, ctx.addresses.timelock)?.feeCap ?? 0n;
+    const stillHigh = ctx.liveFee != null && ctx.liveFee > cap;
     return {
       emphasis: "warn",
       title: "Execution is waiting on the fee",
-      body: `The network’s call at ${formatWhen(outcome.at, now)} stopped with ${outcome.signature}. Execute now, or schedule the network to try again.`,
-      rearm: { enabled: armedAt(AutoAction.Execute) < now, action: AutoAction.Execute },
+      body: stillHigh
+        ? `The network’s call at ${formatWhen(outcome.at, now)} stopped with ${outcome.signature}. The fee is still above the cap, so a retry would stop the same way: execute it once the fee drops.`
+        : `The network’s call at ${formatWhen(outcome.at, now)} stopped with ${outcome.signature}. Execute now, or schedule the network to try again.`,
+      rearm: { enabled: !stillHigh && armedAt(AutoAction.Execute) < now, action: AutoAction.Execute },
       primary: { enabled: true, kind: "execute", label: "Execute now" },
     };
   }
