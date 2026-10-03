@@ -109,7 +109,11 @@ export function useProposalView(id: bigint | null) {
   const proposals = useProposals();
   const overview = useOverview();
   const stats = useNetworkStats();
-  const record = useMemo(() => proposals.data?.find(p => p.id === id) ?? null, [proposals.data, id]);
+  // A proposal id is a 77-digit hash; a small number is the "#3" the pages show, so look it up by that too.
+  const record = useMemo(
+    () => proposals.data?.find(p => p.id === id || (id !== null && id < 1_000_000n && BigInt(p.number) === id)) ?? null,
+    [proposals.data, id],
+  );
   const bundle = record && source.addresses ? crossChainBundle(record, source.addresses.timelock) : null;
   const fee = useFeeQuote(bundle?.calls ?? null, bundle?.destGasLimit ?? 0n);
   const view = useMemo(() => {

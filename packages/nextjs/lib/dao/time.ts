@@ -4,7 +4,7 @@ export function formatClock(ts: number): string {
   return new Date(ts * 1000).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
-/** "14:20:01" for today, "1 Oct 14:20" for other days. */
+/** "14:20:01" for today, "1 Oct 14:20:01" for other days. */
 export function formatWhen(ts: number, now: number): string {
   const day = (t: number) => new Date(t * 1000).toDateString();
   if (day(ts) === day(now)) return formatClock(ts);
@@ -12,6 +12,7 @@ export function formatWhen(ts: number, now: number): string {
   return `${date.toLocaleDateString("en-GB", { day: "numeric", month: "short" })} ${date.toLocaleTimeString("en-GB", {
     hour: "2-digit",
     minute: "2-digit",
+    second: "2-digit",
   })}`;
 }
 

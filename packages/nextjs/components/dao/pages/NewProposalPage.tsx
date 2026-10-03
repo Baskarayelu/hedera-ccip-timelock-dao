@@ -364,7 +364,7 @@ export function NewProposalPage() {
           what: "Runs on Base Sepolia",
           detail:
             delivery !== null
-              ? `Hedera to Base has taken ${formatElapsed(delivery)} lately (median of this DAO’s recent receipts).`
+              ? `Hedera to Base has taken ${formatElapsed(delivery)} lately (median of this DAO’s recent deliveries).`
               : "No delivery from this DAO has been measured yet.",
         },
         {

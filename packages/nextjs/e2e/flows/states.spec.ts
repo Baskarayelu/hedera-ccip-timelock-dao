@@ -63,7 +63,7 @@ const PAGES: { name: string; scenario: string; path?: string; detail?: boolean; 
     scenario: "claimedRecently",
     path: "/voting-power",
     check: async page => {
-      await expect(page.getByTestId("step-2")).toContainText("Claimed at 09:14:02. Next claim from 3 Oct 09:14");
+      await expect(page.getByTestId("step-2")).toContainText("Claimed at 09:14:02. Next claim from 3 Oct 09:14:02");
       await expect(page.getByRole("button", { name: "Claim" })).toBeDisabled();
     },
   },

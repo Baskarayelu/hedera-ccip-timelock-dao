@@ -236,7 +236,7 @@ export function finalityText(stats: NetworkStats | null): string {
 export function deliveryText(stats: NetworkStats | null): string {
   const d = deliveryEstimate(stats);
   if (d === null) return "No delivery from this DAO has been measured yet.";
-  return `Hedera to Base has taken ${formatElapsed(d)} lately (median of this DAO’s recent receipts).`;
+  return `Hedera to Base has taken ${formatElapsed(d)} lately (median of this DAO’s recent deliveries).`;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -438,8 +438,8 @@ function timeline(
       time: queued ? formatWhen(queued.tx.timestamp, now) : "",
       detail: queued
         ? queuedByNetwork
-          ? "Ran with no keeper. Timelock started."
-          : "Queued by hand after the network’s call did not. Timelock started."
+          ? `Ran with no keeper. The timelock ends at ${formatWhen(p.eta, now)}.`
+          : `Queued by hand after the network’s call did not. The timelock ends at ${formatWhen(p.eta, now)}.`
         : "The network queues it one moment after voting ends, if it passed.",
       status: "later",
       link: queued
