@@ -1,6 +1,6 @@
 # hedera-ccip-timelock-dao
 
-[![Docs site](https://img.shields.io/badge/docs-hedera--ccip--timelock--dao--docs.vercel.app-2563eb)](https://hedera-ccip-timelock-dao-docs.vercel.app) **[Docs site](https://hedera-ccip-timelock-dao-docs.vercel.app)**
+[![Docs site](https://img.shields.io/badge/docs-hedera--ccip--timelock--dao--docs.vercel.app-2563eb)](https://hedera-ccip-timelock-dao-docs.vercel.app) **[Docs site](https://hedera-ccip-timelock-dao-docs.vercel.app)** · **[Live demo](https://hedera-ccip-timelock-dao.vercel.app)**
 
 A [Scaffold-HBAR](https://github.com/hedera-dev/create-scaffold-hbar) template for a token-governed DAO on Hedera whose proposals queue and execute themselves, on Hedera or on Base Sepolia.
 
@@ -14,7 +14,7 @@ A [Scaffold-HBAR](https://github.com/hedera-dev/create-scaffold-hbar) template f
 
 ## Live on testnet
 
-A DAO made from this template runs on Hedera testnet, and a freshly scaffolded project opens it: `packages/nextjs/contracts/daoDeployment.ts` points at it until you deploy your own.
+A DAO made from this template runs on Hedera testnet. **[Live demo](https://hedera-ccip-timelock-dao.vercel.app)**: the app, deployed on Vercel against that DAO, so you can look around or take part from a browser with no setup. A freshly scaffolded project opens the same DAO: `packages/nextjs/contracts/daoDeployment.ts` points at it until you deploy your own. Anyone can use it, so its proposals and balances keep changing.
 
 | Hedera testnet | Address | Source |
 |---|---|---|

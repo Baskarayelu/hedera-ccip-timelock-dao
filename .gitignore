@@ -17,3 +17,6 @@ dist
 # secrets
 .env
 .env.local
+
+# Vercel CLI project link
+/.vercel
