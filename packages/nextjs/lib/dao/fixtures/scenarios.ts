@@ -236,6 +236,14 @@ export const SCENARIOS: Record<string, Build> = {
     w.connect(VIEWER);
     return w;
   },
+  noAccount: () => {
+    const w = world(T0);
+    const h = w.holder(VIEWER);
+    h.hasAccount = false;
+    h.hbar = 0n;
+    w.connect(VIEWER);
+    return w;
+  },
   notAssociated: () => {
     const w = world(T0);
     w.connect(VIEWER);

@@ -41,6 +41,12 @@ const PAGES: { name: string; scenario: string; path?: string; detail?: boolean; 
   },
   // Unhappy states: voting power
   {
+    name: "state-no-account",
+    scenario: "noAccount",
+    path: "/voting-power",
+    check: banner("This address has no Hedera account yet"),
+  },
+  {
     name: "state-not-associated",
     scenario: "notAssociated",
     path: "/voting-power",

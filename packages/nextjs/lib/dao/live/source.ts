@@ -480,20 +480,27 @@ export function createLiveSource(dep: HederaDeployment | null, getWallet: () => 
     const tokenId = entityIdOf(dep.governanceToken);
     const autoUsed = relationships.filter(t => t.automatic_association).length;
     const maxAuto = account?.max_automatic_token_associations ?? 0;
-    const [gov, voteBalance, currentVotes, delegate, allowance, lastClaimAt, cooldown, claimAmount] =
-      await hedera.multicall({
-        allowFailure: false,
-        contracts: [
-          { ...token(), functionName: "balanceOf", args: [address] },
-          { ...votes(), functionName: "balanceOf", args: [address] },
-          { ...votes(), functionName: "getVotes", args: [address] },
-          { ...votes(), functionName: "delegates", args: [address] },
-          { ...token(), functionName: "allowance", args: [address, dep.voteToken] },
-          { address: dep.faucet, abi: govTokenFaucetAbi, functionName: "lastClaimAt", args: [address] },
-          { address: dep.faucet, abi: govTokenFaucetAbi, functionName: "claimCooldown" },
-          { address: dep.faucet, abi: govTokenFaucetAbi, functionName: "claimAmount" },
-        ],
-      });
+    const [voteBalance, currentVotes, delegate, lastClaimAt, cooldown, claimAmount] = await hedera.multicall({
+      allowFailure: false,
+      contracts: [
+        { ...votes(), functionName: "balanceOf", args: [address] },
+        { ...votes(), functionName: "getVotes", args: [address] },
+        { ...votes(), functionName: "delegates", args: [address] },
+        { address: dep.faucet, abi: govTokenFaucetAbi, functionName: "lastClaimAt", args: [address] },
+        { address: dep.faucet, abi: govTokenFaucetAbi, functionName: "claimCooldown" },
+        { address: dep.faucet, abi: govTokenFaucetAbi, functionName: "claimAmount" },
+      ],
+    });
+    // HTS reads revert for an address Hedera has no account for (INVALID_ACCOUNT_ID); it holds nothing yet.
+    const [gov, allowance] = account
+      ? await hedera.multicall({
+          allowFailure: false,
+          contracts: [
+            { ...token(), functionName: "balanceOf", args: [address] },
+            { ...token(), functionName: "allowance", args: [address, dep.voteToken] },
+          ],
+        })
+      : [0n, 0n];
     return {
       address,
       accountId: account?.account ?? null,

@@ -40,6 +40,8 @@ const CALLBACK_GAS_USED: Record<AutoAction, bigint> = {
 };
 
 type Holder = {
+  /** False for an EVM address that has never received HBAR, so Hedera has no account for it. */
+  hasAccount: boolean;
   hbar: bigint;
   associated: boolean;
   autoSlots: number;
@@ -136,6 +138,7 @@ export class FixtureWorld implements DaoSource {
     let h = this.holders.get(key);
     if (!h) {
       h = {
+        hasAccount: true,
         hbar: 50n * 10n ** 8n,
         associated: false,
         autoSlots: 0,
@@ -385,7 +388,7 @@ export class FixtureWorld implements DaoSource {
     const h = this.holder(address);
     return {
       address,
-      accountId: "0.0.10813603",
+      accountId: h.hasAccount ? "0.0.10813603" : null,
       hbar: h.hbar,
       associated: h.associated,
       autoAssociationSlots: h.autoSlots,
