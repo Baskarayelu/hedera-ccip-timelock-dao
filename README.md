@@ -40,7 +40,7 @@ You need:
 
 - Node 20.18.3 or later.
 - A Git user name and email that apply in the folder you run the CLI from. The CLI reads `git config user.name` and `user.email` there before it creates a repository, so set a global identity (`git config --global user.name "…"` and `git config --global user.email "…"`). If an `includeIf` rule supplies your identity instead, create a repository under the path the rule matches and run the CLI inside it: `mkdir work && cd work && git init`, check with `git config user.email`, then scaffold there. The project gets its own repository inside `work`; delete `work/.git` afterwards if you like.
-- Foundry: install it with `curl -L https://foundry.paradigm.xyz | bash`, then run `foundryup`. `make` must be available too (on macOS it comes with the Xcode command line tools). Any version from 1.4 builds, tests and deploys; `npm run lint` needs 1.8.4 or later (`foundryup --install 1.8.4`). Before 1.8.4, builds print harmless `unknown id` warnings for lint rules that version does not know.
+- Foundry: install it with `curl -L https://foundry.paradigm.xyz | bash`, then run `foundryup`. `make` must be available too (on macOS it comes with the Xcode command line tools). Any version from 1.4 builds, tests and deploys; `npm run lint` needs 1.8.4 or later (`foundryup --install 1.8.4`). Before 1.8.4, `npm run build` (which compiles the contracts) prints harmless `unknown id` warnings for lint rules that version does not know.
 
 Scaffold and run the template with npm, and leave the CLI's `--package-manager` option at its default; other package managers are not supported.
 
@@ -133,7 +133,7 @@ Run these from the repository root.
 | `npm run foundry:verify:hedera` | Verify the deployed DAO's contracts on Sourcify |
 | `npm run foundry:export` | Regenerate the app's ABIs and addresses from `packages/foundry/deployments` |
 | `npm run check:proofs` | Re-verify every HashScan, CCIP explorer, Basescan and Sourcify link in the docs |
-| `npm run check:mermaid` | Render every Mermaid diagram in the docs in Chromium, failing on one that breaks or is too wide to read |
+| `npm run check:mermaid` | Render every Mermaid diagram in the docs in Chromium, failing on one that breaks or is too wide to read (needs `npx playwright install chromium` once, like the e2e tests) |
 
 ## Docs
 

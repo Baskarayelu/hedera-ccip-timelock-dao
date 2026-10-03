@@ -411,9 +411,9 @@ export class FixtureWorld implements DaoSource {
     return calls.length ? this.knobs.fee : 0n;
   }
 
-  async estimate(tx: DaoTx): Promise<{ gas: bigint; cost: bigint }> {
+  async estimate(tx: DaoTx): Promise<{ gas: bigint; cost: bigint; estimated: boolean }> {
     const gas = GAS_FLOOR[tx.kind];
-    return { gas, cost: gas * GAS_PRICE };
+    return { gas, cost: gas * GAS_PRICE, estimated: true };
   }
 
   // -------------------------------------------------------------------------------------------

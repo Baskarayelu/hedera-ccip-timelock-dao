@@ -21,8 +21,11 @@ export interface DaoSource {
   network(): Promise<NetworkStats>;
   /** Live CCIP fee (tinybar) for sending `calls` to Base with `destGasLimit`. */
   quoteFee(calls: readonly RemoteCall[], destGasLimit: bigint): Promise<bigint>;
-  /** Gas limit to send and the HBAR it will cost at today's gas price (tinybar). */
-  estimate(tx: DaoTx, from: Address): Promise<{ gas: bigint; cost: bigint }>;
+  /**
+   * Gas limit to send and the HBAR it will cost at today's gas price (tinybar). `estimated` is false when the
+   * relay could not estimate it and `cost` is the gas floor's, an upper bound.
+   */
+  estimate(tx: DaoTx, from: Address): Promise<{ gas: bigint; cost: bigint; estimated: boolean }>;
   send(tx: DaoTx, from: Address): Promise<TxResult>;
   /** Fixtures change without a chain; the provider refetches when they do. */
   subscribe?(listener: () => void): () => void;

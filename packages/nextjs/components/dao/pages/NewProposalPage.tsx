@@ -315,7 +315,8 @@ export function NewProposalPage() {
   const cost = useQuery({
     queryKey: ["dao", source.kind, "propose-cost", built?.calldatas.join(","), built?.description, wallet.address],
     queryFn: () => source.estimate({ kind: "propose", proposal: built! }, wallet.address!),
-    enabled: !!built && !!wallet.address,
+    // An address with no Hedera account cannot be estimated for (the relay finds no sender).
+    enabled: !!built && !!wallet.address && !!voter.data?.accountId,
   });
 
   const submit = async () => {
@@ -546,7 +547,11 @@ export function NewProposalPage() {
               <div className="kv">
                 <span className="muted">You pay to propose</span>
                 <span className="mono" data-testid="propose-cost">
-                  {cost.data ? `≈ ${formatHbar(cost.data.cost)}` : "—"}
+                  {voter.data && !voter.data.accountId
+                    ? "Fund your wallet first"
+                    : cost.data
+                      ? `${cost.data.estimated ? "≈" : "at most"} ${formatHbar(cost.data.cost)}`
+                      : "—"}
                 </span>
               </div>
             </div>

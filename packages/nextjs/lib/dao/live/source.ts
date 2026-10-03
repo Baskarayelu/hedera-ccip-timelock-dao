@@ -96,7 +96,7 @@ function decodeLogs(logs: mirror.MirrorLog[], abi: typeof daoGovernorAbi | typeo
 
 async function ccipStatus(messageId: Hex): Promise<CcipMessageStatus | null> {
   try {
-    const res = await fetch(`/api/ccip/${messageId}`, { cache: "no-store" });
+    const res = await fetch(`/api/ccip/${messageId}`, { cache: "no-store", signal: AbortSignal.timeout(20_000) });
     return res.ok ? ((await res.json()) as CcipMessageStatus) : null;
   } catch {
     return null;
@@ -536,15 +536,16 @@ export function createLiveSource(dep: HederaDeployment | null, getWallet: () => 
       const estimated = await hedera.estimateContractGas({ ...plan, account: from } as any);
       const gas = (estimated * 125n) / 100n > plan.floor ? (estimated * 125n) / 100n : plan.floor;
       // Hedera bills the gas used, not the limit; the limit only has to be covered by the balance.
-      return { gas, cost: estimated * price, revert: undefined };
+      return { gas, cost: estimated * price, revert: undefined, estimated: true };
     } catch (error) {
-      return { gas: plan.floor, cost: plan.floor * price, revert: revertDataOf(error) };
+      // No estimate (for example, the sender has no account yet): the floor's cost is only an upper bound.
+      return { gas: plan.floor, cost: plan.floor * price, revert: revertDataOf(error), estimated: false };
     }
   }
 
   async function estimate(tx: DaoTx, from: Address) {
-    const { gas, cost } = await plannedGas(tx, from);
-    return { gas, cost };
+    const { gas, cost, revert, estimated } = await plannedGas(tx, from);
+    return { gas, cost, estimated: estimated && !revert };
   }
 
   async function send(tx: DaoTx, from: Address): Promise<TxResult> {

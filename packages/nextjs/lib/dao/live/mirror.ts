@@ -12,12 +12,21 @@ export type MirrorLog = {
 
 type Page<K extends string, T> = { [key in K]: T[] } & { links?: { next: string | null } };
 
+/** A mirror-node request now and then stalls; give each attempt 15 s and retry once rather than wait forever. */
+const ATTEMPT_MS = 15_000;
+
 async function get<T>(path: string): Promise<T | null> {
   const url = path.startsWith("http") ? path : `${MIRROR_URL}${path}`;
-  const res = await fetch(url, { cache: "no-store" });
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`Mirror node ${res.status} for ${path}`);
-  return (await res.json()) as T;
+  for (let attempt = 1; ; attempt++) {
+    try {
+      const res = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(ATTEMPT_MS) });
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error(`Mirror node ${res.status} for ${path}`);
+      return (await res.json()) as T;
+    } catch (error) {
+      if (attempt >= 2) throw error;
+    }
+  }
 }
 
 /** Every log a contract emitted since `fromSeconds`, oldest first (follows the mirror node's paging). */
@@ -62,7 +71,10 @@ export type MirrorAccount = {
  * answers 200 either way, so a new wallet does not log a mirror-node 404 in the browser console.
  */
 export async function account(address: Address): Promise<MirrorAccount | null> {
-  const res = await fetch(`/api/hedera/account?evm=${address}`, { cache: "no-store" });
+  const res = await fetch(`/api/hedera/account?evm=${address}`, {
+    cache: "no-store",
+    signal: AbortSignal.timeout(ATTEMPT_MS),
+  });
   if (!res.ok) throw new Error(`Account lookup ${res.status} for ${address}`);
   const body = (await res.json()) as {
     accountId: string | null;
