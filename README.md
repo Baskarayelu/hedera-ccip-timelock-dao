@@ -1,8 +1,8 @@
 # hedera-ccip-timelock-dao
 
-[![Docs site](https://img.shields.io/badge/docs-hedera--ccip--timelock--dao--docs.vercel.app-2563eb)](https://hedera-ccip-timelock-dao-docs.vercel.app) **[Docs site](https://hedera-ccip-timelock-dao-docs.vercel.app)** · **[Live demo](https://hedera-ccip-timelock-dao.vercel.app)**
+[![Docs site](https://img.shields.io/badge/docs-hedera--ccip--timelock--dao--docs.vercel.app-2563eb)](https://hedera-ccip-timelock-dao-docs.vercel.app) **[Docs site](https://hedera-ccip-timelock-dao-docs.vercel.app)** · **[Live demo](https://hedera-ccip-timelock-dao.vercel.app)** · **[Demo video](https://www.youtube.com/watch?v=CFcSg-z4tmM)**
 
-A [Scaffold-HBAR](https://github.com/hedera-dev/create-scaffold-hbar) template for a token-governed DAO on Hedera whose proposals queue and execute themselves, on Hedera or on Base Sepolia.
+A [Scaffold-HBAR](https://github.com/hedera-dev/create-scaffold-hbar) template for a token-governed DAO on Hedera whose proposals queue and execute themselves, on Hedera or on Base Sepolia. The [4-minute demo video](https://www.youtube.com/watch?v=CFcSg-z4tmM) follows one proposal through every step on testnet, from the vote to its receipt back from Base.
 
 - **Vote with an HTS token, safely.** Holders wrap the HTS governance token 1:1 into an `ERC20Votes` token, so each vote counts the balance at the proposal's snapshot. Tokens bought after a vote opens cannot vote on it. ([Why wrap to vote](docs/wrap-to-vote.md))
 - **No keeper.** Creating a proposal asks the Hedera Schedule Service (HIP-1215) to call the governor back when voting ends; that call queues the proposal and schedules the one that executes it when the timelock ends. If a scheduled call fails, anyone can finish the job from the app.
