@@ -9,6 +9,7 @@
  * - sepolia.basescan.org/address/0x…     code exists at that address on Base Sepolia
  * - repo.sourcify.dev/<chain>/0x…         Sourcify holds an exact match of the contract's source
  * - base-sepolia.blockscout.com/address/0x…  Blockscout shows verified source (for a minimal proxy, its implementation's)
+ * - base-sepolia.blockscout.com/tx/0x…       Blockscout reports the transaction succeeded
  *
  * Links that document a failure on purpose list their expected outcome in docs/proofs.json, either as the result
  * string or as { "result": …, "gasUsed": … } when the docs quote the gas a transaction used. A schedule can also
@@ -49,6 +50,10 @@ const PATTERNS = [
   {
     kind: "blockscout",
     re: /base-sepolia\.blockscout\.com\/address\/(0x[0-9a-fA-F]{40})/g,
+  },
+  {
+    kind: "blockscout-tx",
+    re: /base-sepolia\.blockscout\.com\/tx\/(0x[0-9a-fA-F]{64})/g,
   },
 ];
 
@@ -173,6 +178,14 @@ const checks = {
     if (!impl) return "not verified on Blockscout";
     const i = await getJson(`${api}/smart-contracts/${impl}`);
     return i.is_verified ? null : `proxy of ${impl}, which is not verified`;
+  },
+  async "blockscout-tx"(hash) {
+    const t = await getJson(
+      `https://base-sepolia.blockscout.com/api/v2/transactions/${hash}`,
+    );
+    return t.status === "ok" && t.result === "success"
+      ? null
+      : `Blockscout status ${t.status ?? `missing (HTTP ${t._status})`}`;
   },
   async "base-address"(address) {
     const code = await baseRpc("eth_getCode", [address, "latest"]);

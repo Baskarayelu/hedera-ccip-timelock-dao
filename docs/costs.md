@@ -52,9 +52,9 @@ Every callback measured, each run once by the network with no keeper:
 | Step | Gas used | HBAR |
 |---|---:|---:|
 | Associate the governance token (only when the account has no free association slot) | 726,488 | 0.60 |
-| Claim 1,000 HGOV from the faucet | 787,895 | 0.65 |
+| Claim 1,000 HGOV from the faucet (an account that associates automatically pays for the association here) | 82,471 already associated, 787,895 associating | 0.07 or 0.65 |
 | Approve the vote token to take HGOV | 727,020 | 0.60 |
-| Wrap HGOV into vHGOV | 145,894 | 0.12 |
+| Wrap HGOV into vHGOV | 114,379–145,894 | 0.09–0.12 |
 | Delegate | 95,644 | 0.08 |
 | Propose (one to five actions) | 1,513,796–1,599,086 | 1.26–1.33 |
 | Vote | 83,238 | 0.07 |
@@ -63,7 +63,7 @@ Every callback measured, each run once by the network with no keeper:
 | *Schedule it again* | 1,495,029 | 1.24 |
 | *Execute now* (an HBAR transfer and one Base action) | 465,311 | 0.39, plus the CCIP fee from the treasury |
 
-Setting up and taking part once (claim, approve, wrap, delegate, propose, vote) spends about 2.8 HBAR, or 3.4 with an association. On the official DAO, voter A's setup, one proposal and its vote cost 2.72–2.73 HBAR ([PROOFS.md](../PROOFS.md#voting-power)). The relay also wants each transaction's `gasLimit × eth_gasPrice` on hand when it is sent; for a proposal that is about 2.1 HBAR. The New proposal page's "You pay to propose" shows the relay's gas estimate at `eth_gasPrice`, about 15% above what is then billed (for example ≈ 1.42 HBAR shown, 1.23–1.24 billed). **About 10 HBAR covers every step** with room to spare.
+Setting up and taking part once (claim, approve, wrap, delegate, propose, vote) spends about 2.8 HBAR, with or without the association step (the claim costs less after it). On the official DAO, voter A's setup, one proposal and its vote cost 2.72–2.73 HBAR ([PROOFS.md](../PROOFS.md#voting-power)). The relay also wants each transaction's `gasLimit × eth_gasPrice` on hand when it is sent; for a proposal that is about 2.1 HBAR. The New proposal page's "You pay to propose" shows the relay's gas estimate at `eth_gasPrice`, about 15% above what is then billed (for example ≈ 1.42 HBAR shown, 1.23–1.24 billed). **About 10 HBAR covers every step** with room to spare.
 
 ## What a proposal costs the DAO
 
@@ -89,6 +89,7 @@ The DAO in [PROOFS.md](../PROOFS.md) runs with the default limits (3,000,000 and
 | 3. Parameter on Base | 1,609,844 gas | 465,700 gas | 1.138 HBAR | 0.0000579 ETH |
 | 4. 5 USDC payout on Base | 1,609,928 gas | 465,784 gas | 1.139 HBAR | 0.0000587 ETH |
 | 7. 4 USDC payout on Base (filmed for the demo) | 1,612,626 gas | 468,482 gas | 1.186 HBAR | 0.0000597 ETH |
+| 8. 1 USDC payout on Base (filmed for the demo) | 1,612,626 gas | 468,482 gas | 1.175 HBAR | 0.0000595 ETH |
 
 Its deployment cost 21.73 HBAR in gas and fees, plus the 35 HBAR of default float and treasury funding (and 0.02 HBAR for the admin renounce that had to be repeated, see [PROOFS.md](../PROOFS.md#deployment)).
 
